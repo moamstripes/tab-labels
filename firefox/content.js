@@ -1,31 +1,66 @@
 "use strict";
 
 (function () {
-  if (window.__tabLabelsLoaded) return;
-  window.__tabLabelsLoaded = true;
+  // Only one live copy per page. A copy left behind by an older version of the extension is
+  // dead (cut off from the extension) and does not count.
+  const previous = window.__tabLabelsInstance;
+  if (previous && previous.alive()) return;
+  window.__tabLabelsInstance = { alive };
 
   const ICON_ID = "tab-labels-icon";
+  // What the extension leaves in a page is recorded in the page itself, not only in this
+  // script's memory. When the extension is updated the old script dies but its changes stay;
+  // a newer copy of the script (or the refresh button) can then find and clean them up.
+  const PREFIX_ATTR = "data-tab-labels-prefix"; // on <html>: the prefix currently on the title
+  const HIDDEN_REL = "x-tab-labels-hidden"; // rel given to the page's own icon links while ours is shown
+  const SAVED_REL_ATTR = "data-tab-labels-rel"; // on those links: their original rel
   const REAPPLY_DELAY_MS = 200;
 
-  let current = { label: null, display: { favicon: true, title: true, emoji: true } };
-  let appliedPrefix = ""; // the prefix currently on the title, "" if none
-  let removedIcons = []; // the page's own icon links, taken out while our icon is shown
+  let current = { label: null, display: { favicon: true, title: true, emoji: true }, allPrefixes: [] };
   let faviconVersion = 0; // discards results of superseded async renders
   let faviconWanted = false;
   let reapplyTimer = null;
+  let observer = null;
+  const recentRewrites = [];
   const renderCache = new Map();
+  const MAX_REWRITES = 8; // within REWRITE_WINDOW_MS; more than that means something is fighting us
+  const REWRITE_WINDOW_MS = 1000;
 
   function head() {
     return document.head || document.documentElement;
   }
 
+  // False once the extension has been updated, disabled or removed: this copy of the script is
+  // then cut off from it and must stop touching the page.
+  function alive() {
+    try {
+      return !!(browser.runtime && browser.runtime.id);
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Title
+
+  function appliedPrefix() {
+    return document.documentElement.getAttribute(PREFIX_ATTR) || "";
+  }
+
+  function setAppliedPrefix(prefix) {
+    if (prefix) document.documentElement.setAttribute(PREFIX_ATTR, prefix);
+    else document.documentElement.removeAttribute(PREFIX_ATTR);
+  }
+
+  // Every prefix that could be on the title: the one applied now, and every prefix any label
+  // can produce (this covers leftovers from an older version of the extension).
+  function knownPrefixes() {
+    return current.allPrefixes.concat(appliedPrefix());
+  }
 
   function applyTitle() {
     const want = current.label ? TabLabels.titlePrefix(current.label, current.display) : "";
-    const title = TabLabels.stripPrefix(document.title, appliedPrefix);
-    appliedPrefix = want;
-    const next = TabLabels.buildTitle(title, want);
+    const next = TabLabels.normaliseTitle(document.title, want, knownPrefixes());
+    setAppliedPrefix(want);
     if (document.title !== next) document.title = next;
   }
 
@@ -35,8 +70,12 @@
     return Array.from(document.querySelectorAll('link[rel~="icon" i]')).filter((l) => l.id !== ICON_ID);
   }
 
+  function savedIconLinks() {
+    return Array.from(document.querySelectorAll("link[" + SAVED_REL_ATTR + "]"));
+  }
+
   function findIconUrl() {
-    const link = iconLinks().concat(removedIcons).find((l) => l.href);
+    const link = iconLinks().concat(savedIconLinks()).find((l) => l.href);
     if (link) return link.href;
     return /^https?:/.test(location.origin) ? location.origin + "/favicon.ico" : null;
   }
@@ -44,14 +83,18 @@
   function clearFavicon() {
     const ours = document.getElementById(ICON_ID);
     if (ours) ours.remove();
-    for (const l of removedIcons) head().appendChild(l);
-    removedIcons = [];
+    for (const l of savedIconLinks()) {
+      l.setAttribute("rel", l.getAttribute(SAVED_REL_ATTR));
+      l.removeAttribute(SAVED_REL_ATTR);
+      head().appendChild(l); // browsers notice a link being inserted, but not always a changed rel
+    }
   }
 
   function installFavicon(href) {
     for (const l of iconLinks()) {
-      l.remove();
-      removedIcons.push(l);
+      l.setAttribute(SAVED_REL_ATTR, l.getAttribute("rel"));
+      l.setAttribute("rel", HIDDEN_REL);
+      head().appendChild(l);
     }
     let ours = document.getElementById(ICON_ID);
     if (!ours) {
@@ -100,16 +143,45 @@
     return node.nodeType === 1 && node.tagName === "LINK" && node.id !== ICON_ID && /(^|\s)icon(\s|$)/i.test(node.rel);
   }
 
+  // True if rewriting the title is still reasonable. If something (such as a copy of this script
+  // left behind by an older version) keeps changing the title back, stop instead of looping.
+  function rewriteAllowed() {
+    const now = Date.now();
+    while (recentRewrites.length && now - recentRewrites[0] > REWRITE_WINDOW_MS) recentRewrites.shift();
+    if (recentRewrites.length >= MAX_REWRITES) return false;
+    recentRewrites.push(now);
+    return true;
+  }
+
+  function startWatching() {
+    observer.observe(head(), { childList: true, subtree: true, characterData: true });
+  }
+
   function onHeadChange(mutations) {
-    if (appliedPrefix && !TabLabels.isPrefixed(document.title, appliedPrefix)) {
-      document.title = TabLabels.buildTitle(document.title, appliedPrefix);
+    if (!alive()) {
+      observer.disconnect();
+      clearTimeout(reapplyTimer);
+      return;
+    }
+    // Keep exactly one prefix, at the front, even if the page rewrote the title around ours.
+    const prefix = appliedPrefix();
+    if (prefix) {
+      const next = TabLabels.normaliseTitle(document.title, prefix, knownPrefixes());
+      if (document.title !== next) {
+        if (!rewriteAllowed()) {
+          observer.disconnect();
+          return;
+        }
+        document.title = next;
+      }
     }
     if (faviconWanted && mutations.some((m) => Array.from(m.addedNodes).some(isForeignIconLink))) {
       scheduleFavicon();
     }
   }
 
-  new MutationObserver(onHeadChange).observe(head(), { childList: true, subtree: true, characterData: true });
+  observer = new MutationObserver(onHeadChange);
+  startWatching();
 
   // State from the background
 
@@ -121,14 +193,30 @@
       return;
     }
     if (!state) return;
-    current = state;
+    current = Object.assign({ allPrefixes: [] }, state);
+    recentRewrites.length = 0;
+    startWatching();
     applyTitle();
     applyFavicon();
   }
 
+  // Takes off everything this extension put on the page, then puts it back from the current state.
+  async function reset() {
+    const plain = TabLabels.stripAllPrefixes(document.title, knownPrefixes());
+    setAppliedPrefix("");
+    if (document.title !== plain) document.title = plain;
+    faviconVersion++;
+    faviconWanted = false;
+    clearTimeout(reapplyTimer);
+    clearFavicon();
+    await refresh();
+  }
+
   // Replying lets the background tell a tab that has this script from one that does not.
   browser.runtime.onMessage.addListener((message) => {
-    if (message && message.type === "refresh") return refresh().then(() => ({ ok: true }));
+    if (!message) return undefined;
+    if (message.type === "refresh") return refresh().then(() => ({ ok: true }));
+    if (message.type === "reset") return reset().then(() => ({ ok: true }));
     return undefined;
   });
 

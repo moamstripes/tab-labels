@@ -57,7 +57,9 @@ The current version is in each `manifest.json`; published versions are on the re
 
 ## Gotchas
 
-- Tabs that were open before the extension was installed or updated have no content script until reloaded. The settings page button "Refresh labels on all tabs" injects it with the `scripting` permission. A content script must answer the `refresh` message, otherwise that button cannot tell a tab that has it from one that does not.
+- Tabs that were open before the extension was installed or updated may have no content script. The settings page button "Refresh labels on all tabs" sends `reset` to each tab (remove everything the extension put there, then re-apply) and injects the script, with the `scripting` permission, where there is none. A content script must answer `refresh` and `reset`, otherwise the button cannot tell a tab that has it from one that does not.
+- Never keep page state only in the content script's memory: after an update the old script is dead but its changes stay. The applied title prefix and the hidden icon links are recorded in the page (`data-tab-labels-*` attributes). Titles are always normalised with `TabLabels.normaliseTitle` (one prefix, at the front, whatever else is in the title).
+- Updates: Firefox kills the old content script, Chrome leaves it running in open tabs (cut off, but its observer still runs) and also clears `storage.session`. See the "Doubled labels" section of the spec. To test an update, install an older release from git (`git archive firefox-vX.Y.Z firefox`) and then the new code over it in a throwaway profile.
 
 - Firefox MV3 host permissions can be revoked by the user; labels then cannot show.
 - Labels cannot be shown on `about:`/`chrome://` pages, the PDF viewer or the add-on stores. The label is still stored.

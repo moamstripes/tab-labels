@@ -99,6 +99,39 @@
     return parts.length ? parts.join(" ") + " · " : "";
   }
 
+  // Every prefix any label could put in front of a title: emoji and name, name only,
+  // emoji only. Used to recognise (and remove) prefixes left on a title.
+  function allPrefixes(labels) {
+    const variants = [
+      { emoji: true, title: true },
+      { emoji: false, title: true },
+      { emoji: true, title: false },
+    ];
+    const found = new Set();
+    for (const label of labels || []) {
+      for (const v of variants) {
+        const p = titlePrefix(label, v);
+        if (p) found.add(p);
+      }
+    }
+    return Array.from(found);
+  }
+
+  // Removes every occurrence of each prefix, anywhere in the title (longest first).
+  function stripAllPrefixes(title, prefixes) {
+    let out = String(title);
+    const list = (prefixes || []).filter((p) => typeof p === "string" && p !== "");
+    list.sort((a, b) => b.length - a.length);
+    for (const p of list) out = out.split(p).join("");
+    return out;
+  }
+
+  // The title with exactly one prefix, at the front, whatever the page or an older copy
+  // of the extension did to it. An empty prefix gives the plain title.
+  function normaliseTitle(title, prefix, knownPrefixes) {
+    return (prefix || "") + stripAllPrefixes(title, (knownPrefixes || []).concat(prefix || ""));
+  }
+
   function buildTitle(title, prefix) {
     return prefix + title;
   }
@@ -209,6 +242,9 @@
     makeId,
     findLabel,
     titlePrefix,
+    allPrefixes,
+    stripAllPrefixes,
+    normaliseTitle,
     buildTitle,
     isPrefixed,
     stripPrefix,

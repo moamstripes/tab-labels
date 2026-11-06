@@ -45,3 +45,10 @@ test("settings page loads the emoji picker scripts in order, and they exist", ()
   }
   assertTrue(fileExists("lib/emoji.js") && fileExists("options/emoji-picker.js"), "picker files missing");
 });
+
+test("settings page has a favicon that points at a real file", () => {
+  const html = readFile("options/options.html");
+  const match = html.match(/<link[^>]*rel="icon"[^>]*href="([^"]+)"/);
+  assertTrue(!!match, "options.html has no <link rel=\"icon\">");
+  assertTrue(fileExists("options/" + match[1]), "favicon file missing: " + match[1]);
+});

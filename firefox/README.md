@@ -31,7 +31,7 @@ The first time, the add-on was created with **Submit a New Add-on**, then **On y
 - Right-click a tab, then **Label tab**, then a label. **Remove label** clears it.
 - Add, edit and delete labels in the add-on settings: `about:addons`, Tab Labels, Preferences. The same page has the three display toggles (favicon bubble, title label, emoji), the container rules, and **Import from file** / **Export to file** for labels.
 - The **Label tab** submenu on the tab right-click menu ends with **Tab Labels settings**, which opens the settings page.
-- **Refresh labels on all tabs** (settings page, under the display toggles) re-applies labels on every open tab. Tabs that were already open when the extension was installed or updated have no label code running in them, so it adds that code to them, which is why the extension has the `scripting` permission. Browser pages and tabs that have not loaded yet cannot be reached; the page says how many.
+- **Refresh labels on all tabs** (settings page, under the display toggles) does a full reset: in every open tab it removes what the extension put there (the title prefix and the icon dot, including any prefix an older version left behind) and then puts the labels back from the stored state. That clears a label shown twice. Tabs that were already open when the extension was installed or updated have no label code running in them, so it adds that code to them first, which is why the extension has the `scripting` permission. Browser pages and tabs that have not loaded yet cannot be reached; the page says how many.
 - Click a label's emoji box on the settings page to open an emoji picker. Search by word, click one, and it is filled in. Browsers do not let a page open the computer's own emoji menu, so the picker has its own list; the system menu (on a Mac, Control + Command + Space) works inside the picker's search box, and anything pasted into the emoji box works too. Enter in the search box picks the first match.
 - In the label list, Enter in a name box moves to the next label, and after the last label it adds a new one with the picker open. Enter in the emoji box jumps to the same label's name. A blank last label is not duplicated.
 - Export saves your labels (emoji, name, colour) to `tab-labels.json`. Import adds the labels in a file to your list without replacing anything, skips ones you already have, and lets you check them before you press **Save labels**. Container rules and tab labels are not exported, because they belong to one Firefox profile.
@@ -39,7 +39,9 @@ The first time, the add-on was created with **Submit a New Add-on**, then **On y
 - Containers: in the settings, pick a label per container. New tabs opened in that container get it, and so do open tabs in that container that have no label when you pick it. A tab you label or unlabel yourself is left alone. Needs Firefox containers (for example the Multi-Account Containers add-on).
 - Pinned tabs show only the favicon, so the coloured dot is what you see there. A label's name is optional; without one the title reads like `⏳ · Inbox`.
 - Labels cannot be shown on `about:` pages, the built-in PDF viewer or addons.mozilla.org (Firefox blocks extensions there). The label is still saved on the tab.
-- Labels stay on a tab across navigation and Firefox restarts. They are removed when the tab is closed.
+- Labels stay on a tab across navigation, extension updates and Firefox restarts. They are removed when the tab is closed.
+- Updating the extension is safe for tabs that are open: the new version removes what the old one left in them, so a label is not shown twice. (If a tab ever does show one, **Refresh labels on all tabs** in the settings clears it.)
+- The settings page has a label emoji (🏷️) as its tab icon.
 
 ## Tests
 
@@ -51,6 +53,7 @@ This uses the JavaScript engine built into macOS, so Node is not needed. It cove
 - [ ] Each of the three toggles (favicon bubble, title label, emoji) applies immediately to open tabs, alone and in combination.
 - [ ] A labelled tab in a container shows no dot on its icon; a labelled tab outside a container does.
 - [ ] Container rule: open a new tab in the container and it gets the label; unlabel it and it stays unlabelled after a restart.
+- [ ] Update the extension (reload it in the browser) while a tab is labelled: the tab never shows the label twice.
 - [ ] Open some tabs, install or reload the extension, label a tab, then press **Refresh labels on all tabs**: the old tab shows its label and the page reports how many tabs it refreshed.
 - [ ] **Tab Labels settings** at the bottom of the **Label tab** submenu opens the settings page.
 - [ ] Click a label's emoji box: the picker opens under it. Search for a word, click an emoji, and it fills the box.

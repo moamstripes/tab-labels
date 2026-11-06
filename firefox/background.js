@@ -80,13 +80,14 @@ browser.menus.onClicked.addListener(handleMenuClick);
 
 const DISPLAY_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji", "displayMode"];
 
-// For the settings page button: refresh every tab, and add the label code to tabs that
-// were open before the extension was installed or updated (they have none yet).
+// For the settings page button: in every tab remove what the extension put there and put it
+// back, adding the label code first to tabs that were open before the extension was installed
+// or updated (they have none yet).
 async function refreshEverywhere() {
   const result = { refreshed: 0, injected: 0, skipped: 0 };
   for (const tab of await browser.tabs.query({})) {
     try {
-      await browser.tabs.sendMessage(tab.id, { type: "refresh" });
+      await browser.tabs.sendMessage(tab.id, { type: "reset" });
       result.refreshed++;
     } catch (e) {
       try {
@@ -147,11 +148,15 @@ async function applyChangedRules(change) {
 async function getState(sender) {
   const { labels, display } = await loadSettings();
   const tabId = sender.tab && sender.tab.id;
-  if (tabId === undefined) return { label: null, display };
+  // allPrefixes lets the page recognise (and remove) any prefix this extension, or an
+  // older version of it, may have left on the title.
+  const allPrefixes = TabLabels.allPrefixes(labels);
+  if (tabId === undefined) return { label: null, display, allPrefixes };
   const labelId = await browser.sessions.getTabValue(tabId, TAB_KEY);
   return {
     label: TabLabels.findLabel(labels, labelId),
     display: TabLabels.displayForTab(display, sender.tab.cookieStoreId),
+    allPrefixes,
   };
 }
 

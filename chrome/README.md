@@ -8,7 +8,8 @@ Chrome does not offer some things Firefox does, so three features work different
 
 - **No tab right-click menu.** Chrome does not let extensions add items to the tab strip's menu. The **Label tab** menu is on the right-click menu of the page and of the extension's toolbar icon, and applies to the current tab.
 - **No containers.** Container rules and the "no dot in containers" rule do not exist here, because Chrome has no containers.
-- **Labels do not survive quitting Chrome.** Chrome has no per-tab storage that outlives the browser, so a tab's label is kept while Chrome is open (through page loads, navigation and the extension restarting) and is lost when Chrome quits. Your label list, toggles and settings are kept permanently.
+- **Labels do not survive quitting Chrome, or updating the extension.** Chrome has no per-tab storage that outlives the browser, so a tab's label is kept while Chrome is open (through page loads, navigation and the service worker restarting) and is lost when Chrome quits or when the extension is updated or reloaded. Your label list, toggles and settings are kept permanently.
+- **After updating from a version before 1.3.1, reload the tabs that had labels, once.** Chrome leaves the old copy of the extension's code running in open tabs, and it keeps putting its old label back. From 1.3.1 on, a copy that an update has cut off stops itself, so this does not repeat. The title watcher also gives up, instead of looping, if something keeps undoing its changes.
 
 ## Install
 
@@ -26,7 +27,7 @@ Chrome keeps an unpacked extension across restarts as long as this folder stays 
 - Click the toolbar icon to open the settings.
 - In the settings you can add, edit and delete labels, switch the three display options (favicon bubble, title label, emoji), and use **Import from file** / **Export to file** for labels.
 - The **Label tab** submenu ends with **Tab Labels settings**, which opens the settings page.
-- **Refresh labels on all tabs** (settings page, under the display toggles) re-applies labels on every open tab. Tabs that were already open when the extension was installed or updated have no label code running in them, so it adds that code to them, which is why the extension has the `scripting` permission. Browser pages and tabs that have not loaded yet cannot be reached; the page says how many.
+- **Refresh labels on all tabs** (settings page, under the display toggles) does a full reset: in every open tab it removes what the extension put there (the title prefix and the icon dot, including any prefix an older version left behind) and then puts the labels back from the stored state. That clears a label shown twice. Tabs that were already open when the extension was installed or updated have no label code running in them, so it adds that code to them first, which is why the extension has the `scripting` permission. Browser pages and tabs that have not loaded yet cannot be reached; the page says how many.
 - Click a label's emoji box on the settings page to open an emoji picker. Search by word, click one, and it is filled in. Browsers do not let a page open the computer's own emoji menu, so the picker has its own list; the system menu (on a Mac, Control + Command + Space) works inside the picker's search box, and anything pasted into the emoji box works too. Enter in the search box picks the first match.
 - In the label list, Enter in a name box moves to the next label, and after the last label it adds a new one with the picker open. Enter in the emoji box jumps to the same label's name. A blank last label is not duplicated.
 - Export saves your labels (emoji, name, colour) to `tab-labels.json`. Import adds the labels in a file to your list without replacing anything, skips ones you already have, and lets you check them before you press **Save labels**.
@@ -48,6 +49,7 @@ This uses the JavaScript engine built into macOS, so Node is not needed. It cove
 - [ ] A page that changes its own title keeps the prefix.
 - [ ] A label with an empty name works in the menu, title and settings page.
 - [ ] Add, edit, delete and reset labels on the settings page; the right-click menu updates.
+- [ ] Update the extension (reload it in the browser) while a tab is labelled: the tab never shows the label twice.
 - [ ] Open some tabs, install or reload the extension, label a tab, then press **Refresh labels on all tabs**: the old tab shows its label and the page reports how many tabs it refreshed.
 - [ ] **Tab Labels settings** at the bottom of the **Label tab** submenu opens the settings page.
 - [ ] Click a label's emoji box: the picker opens under it. Search for a word, click an emoji, and it fills the box.

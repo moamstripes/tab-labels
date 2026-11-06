@@ -321,3 +321,41 @@ test("refreshSummary copes with no tabs, or none reachable", () => {
   );
   assertEqual(TabLabels.refreshSummary(null), "There are no open tabs to refresh.");
 });
+
+test("allPrefixes lists every prefix a label can put in a title", () => {
+  const all = TabLabels.allPrefixes(TabLabels.defaultSettings().labels);
+  assertTrue(all.includes("⏳ Waiting · "), "emoji and name");
+  assertTrue(all.includes("Waiting · "), "name only");
+  assertTrue(all.includes("⏳ · "), "emoji only");
+  assertEqual(new Set(all).size, all.length, "no duplicates");
+});
+
+test("allPrefixes handles a label with no name and an empty list", () => {
+  assertEqual(TabLabels.allPrefixes([{ id: "x", name: "", emoji: "👀", colour: "#000000" }]), ["👀 · "]);
+  assertEqual(TabLabels.allPrefixes([]), []);
+  assertEqual(TabLabels.allPrefixes(undefined), []);
+});
+
+test("stripAllPrefixes removes every occurrence, anywhere in the title", () => {
+  const known = ["⏳ Waiting · ", "⏸️ Paused · "];
+  assertEqual(TabLabels.stripAllPrefixes("(1) ⏳ Waiting · Inbox", known), "(1) Inbox");
+  assertEqual(TabLabels.stripAllPrefixes("⏸️ Paused · ⏳ Waiting · Inbox", known), "Inbox");
+  assertEqual(TabLabels.stripAllPrefixes("Inbox", known), "Inbox");
+  assertEqual(TabLabels.stripAllPrefixes("Inbox", []), "Inbox");
+  assertEqual(TabLabels.stripAllPrefixes("Inbox", ["", null]), "Inbox");
+});
+
+test("normaliseTitle leaves exactly one prefix, at the front", () => {
+  const known = TabLabels.allPrefixes(TabLabels.defaultSettings().labels);
+  const waiting = "⏳ Waiting · ";
+  assertEqual(TabLabels.normaliseTitle("Inbox", waiting, known), waiting + "Inbox");
+  assertEqual(TabLabels.normaliseTitle(waiting + "Inbox", waiting, known), waiting + "Inbox");
+  assertEqual(TabLabels.normaliseTitle("(1) " + waiting + "Inbox", waiting, known), waiting + "(1) Inbox");
+  assertEqual(TabLabels.normaliseTitle(waiting + "(1) " + waiting + "Inbox", waiting, known), waiting + "(1) Inbox");
+});
+
+test("normaliseTitle replaces another label's prefix and can remove the label entirely", () => {
+  const known = TabLabels.allPrefixes(TabLabels.defaultSettings().labels);
+  assertEqual(TabLabels.normaliseTitle("⏸️ Paused · (2) Inbox", "⏳ Waiting · ", known), "⏳ Waiting · (2) Inbox");
+  assertEqual(TabLabels.normaliseTitle("⏳ Waiting · (2) Inbox", "", known), "(2) Inbox");
+});

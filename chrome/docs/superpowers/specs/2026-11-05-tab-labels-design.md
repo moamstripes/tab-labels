@@ -114,3 +114,19 @@ This folder is the Chrome port of the Firefox extension, with the same name, set
 
 - **Settings in the menu.** The **Label tab** submenu ends with a separator and **Tab Labels settings**, which calls `openOptionsPage()`. The click handler is a named function, `handleMenuClick(info, tab)`, so it can be called directly in tests.
 - **Refresh labels on all tabs.** A button on the settings page sends `{type: "refreshAllTabs"}` to the background. `refreshEverywhere()` messages every tab with `refresh`; a tab whose content script answers is counted as refreshed. A tab that does not answer (open before the extension was installed or updated) gets `lib/labels.js` and `content.js` injected with `scripting.executeScript`, which needs the `scripting` permission. Tabs that cannot be injected (browser pages, tabs not loaded) are counted as skipped. The content script now replies to `refresh`, which is how the two cases are told apart. The message shown is built by `refreshSummary` in `lib/labels.js`. The automatic refresh when a setting changes still only messages tabs and never injects.
+
+## Doubled labels and extension updates (1.3.1, same in both browsers)
+
+**Cause.** A label could appear twice in a tab title. Three things produced it: (1) a site that builds its new title from the current one, such as `"(3) " + document.title`, leaves our prefix in the middle, and the old code only looked at the start of the title; (2) changing a label on such a page left the old prefix in the middle while the new one went on the front; (3) when the extension was updated, the old content script died but its changes stayed in the page, and the new script (which Firefox injects into open tabs on update) added a second prefix on top. In 1.2.0 to 1.3.0 this showed as `⏳ Waiting · ⏳ Waiting · Inbox` immediately after the update, and the refresh button did not clear it.
+
+**Fix.**
+- State the extension leaves in a page is recorded in the page: the applied prefix in `data-tab-labels-prefix` on `<html>`, and the page's own icon links are hidden by changing their `rel` (original kept in `data-tab-labels-rel`) instead of being held only in the script's memory. A newer copy of the script finds and cleans these up.
+- `TabLabels.allPrefixes(labels)` lists every prefix any label can produce; the background sends it with the tab's state. `TabLabels.normaliseTitle(title, prefix, known)` removes every occurrence of every known prefix, anywhere in the title, and puts exactly one `prefix` at the front. It runs when a label is applied and whenever the page rewrites its title.
+- The refresh button now sends `reset`: each tab removes everything the extension put there, then re-applies the stored state. Tabs without the content script get it injected (its first refresh does the same cleaning).
+- A live-copy guard (`window.__tabLabelsInstance`) lets a new copy start when the previous copy is dead (`runtime.id` gone). A dead copy disconnects its own observer.
+- The title watcher stops after more than 8 rewrites within a second, so two copies undoing each other cannot loop. The next refresh starts it again.
+- Restoring or hiding an icon link also re-inserts the link, because browsers do not reliably notice a changed `rel`.
+
+**Browser differences.** Firefox kills the old script on update, so only leftovers remain and the new code removes them. Chrome leaves the old script running in open tabs, cut off from the extension, and its observer keeps re-adding its old prefix; only a reload of the tab removes it (needed once, when updating from a version before 1.3.1). Chrome also clears `storage.session`, so per-tab labels are lost on update.
+
+**Settings page icon.** `icons/label.svg` (the 🏷️ emoji) is the favicon of the settings page.
