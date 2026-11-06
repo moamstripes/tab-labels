@@ -53,7 +53,7 @@ Unit tests cannot cover the browser APIs. Use throwaway profiles and delete them
 
 Push a tag `firefox-v<version>` or `chrome-v<version>` whose number equals that folder's `manifest.json` version. `release.yml` checks it, runs the tests, builds the zip and creates the GitHub release. For Firefox it also signs a private (unlisted) add-on if the repo secrets `AMO_JWT_ISSUER` and `AMO_JWT_SECRET` exist. Mozilla rejects a version number it has already signed, so each Firefox release needs a new version. The Firefox add-on's developer page is https://addons.mozilla.org/en-US/developers/addon/fdb422307dd04e4c91e8/. Chrome Web Store publishing is not set up.
 
-The current version is in each `manifest.json`; published versions are on the repository's Releases page. The whole flow (commit, version bump, push, tags, checking the releases) is in the `release-tab-labels` skill.
+The current version is in each `manifest.json`; published versions are on the repository's Releases page. The whole flow (commit, version bump, push, tags, checking the releases) is in the `release-tab-labels` skill. The workflow can also be run by hand for an existing tag (`gh workflow run release.yml -f tag=firefox-vX.Y.Z`) to sign it and attach the files to that release.
 
 ## Gotchas
 

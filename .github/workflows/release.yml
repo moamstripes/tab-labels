@@ -8,12 +8,22 @@ name: Release
 # Firefox is also signed as a private (unlisted) add-on when the repository has the
 # secrets AMO_JWT_ISSUER and AMO_JWT_SECRET. Without them the release still contains
 # the zip, just not the signed .xpi.
+#
+# It can also be started by hand for a tag that already exists, to build, sign and
+# attach the files to that tag's release (the release is updated, not recreated):
+#   gh workflow run release.yml -f tag=firefox-v1.2.0
 
 on:
   push:
     tags:
       - "firefox-v*"
       - "chrome-v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and attach files for, e.g. firefox-v1.2.0"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -22,16 +32,23 @@ jobs:
   release:
     runs-on: macos-latest
     env:
+      TAG: ${{ inputs.tag || github.ref_name }}
       AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
       AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Read the browser and version from the tag
         id: tag
         run: |
-          echo "browser=${GITHUB_REF_NAME%%-v*}" >> "$GITHUB_OUTPUT"
-          echo "version=${GITHUB_REF_NAME#*-v}" >> "$GITHUB_OUTPUT"
+          if ! [[ "$TAG" =~ ^(firefox|chrome)-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'$TAG' is not a release tag. Expected firefox-vX.Y.Z or chrome-vX.Y.Z."
+            exit 1
+          fi
+          echo "browser=${TAG%%-v*}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#*-v}" >> "$GITHUB_OUTPUT"
 
       - name: Check the manifest version matches the tag
         env:
@@ -64,7 +81,7 @@ jobs:
           --api-key "$AMO_JWT_ISSUER"
           --api-secret "$AMO_JWT_SECRET"
 
-      - name: Create the GitHub release
+      - name: Create or update the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           BROWSER: ${{ steps.tag.outputs.browser }}
@@ -77,7 +94,11 @@ jobs:
             firefox) name="Firefox" ;;
             chrome) name="Chrome" ;;
           esac
-          gh release create "$GITHUB_REF_NAME" "${files[@]}" \
-            --verify-tag \
-            --title "Tab Labels for $name $VERSION" \
-            --generate-notes
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" "${files[@]}" --clobber
+          else
+            gh release create "$TAG" "${files[@]}" \
+              --verify-tag \
+              --title "Tab Labels for $name $VERSION" \
+              --generate-notes
+          fi

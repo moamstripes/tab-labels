@@ -56,16 +56,19 @@ The number in the tag has to match `version` in that browser's `manifest.json`. 
 
 Both workflows run on macOS runners because the tests use the macOS JavaScript engine. If the repository is private, macOS minutes cost more than Linux ones on GitHub's plans.
 
-### Signing the Firefox release (optional, one-time setup)
+### Signing the Firefox release (one-time setup)
 
 Firefox only keeps add-ons that Mozilla has signed. The add-on's developer page is <https://addons.mozilla.org/en-US/developers/addon/fdb422307dd04e4c91e8/>.
 
 To have the release workflow sign it as a private (unlisted) add-on and attach the `.xpi`:
 
 1. Create API credentials at <https://addons.mozilla.org/developers/addon/api/key/>.
-2. In the GitHub repository, go to Settings, Secrets and variables, Actions, and add two repository secrets: `AMO_JWT_ISSUER` (the JWT issuer) and `AMO_JWT_SECRET` (the JWT secret).
+2. Store them as two repository secrets, `AMO_JWT_ISSUER` (the JWT issuer) and `AMO_JWT_SECRET` (the JWT secret). From a terminal, `gh secret set AMO_JWT_ISSUER --repo moamstripes/tab-labels` and then the same for `AMO_JWT_SECRET`; each command asks for the value and hides it as you paste. Or use Settings, Secrets and variables, Actions on GitHub. Do not paste the values into chat, issues or files.
+3. Check they are there with `gh secret list --repo moamstripes/tab-labels` (it lists names only).
 
 Without these secrets the Firefox release still happens, just with the zip and no `.xpi`. Mozilla rejects a version number it has already signed, so each Firefox release needs a new version.
+
+To sign a version that was released earlier without a signed file, run the workflow by hand for its tag: `gh workflow run release.yml -f tag=firefox-v1.2.0`. It rebuilds the zip, signs it, and adds the files to the existing release.
 
 ### Not automated
 
