@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tab Labels for Firefox</title>
+    <meta
+      name="description"
+      content="Tag Firefox tabs with coloured labels such as Waiting, Paused and To do. Everything stays in your browser."
+    />
+    <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f3f4f8;
+        --card: #ffffff;
+        --text: #1c1e26;
+        --muted: #5a6070;
+        --border: #dfe2ea;
+        --accent: #3d6fc4;
+        --accent-text: #ffffff;
+        --orange: #d98e04;
+        --blue: #4a7fd4;
+        --green: #2f9e6b;
+        --strip: #dde1ea;
+        --tab: #ffffff;
+        --tab-idle: #eceef4;
+        font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14161b;
+          --card: #1f222a;
+          --text: #eceef3;
+          --muted: #a7adbb;
+          --border: #333845;
+          --accent: #7aa6f5;
+          --accent-text: #10131a;
+          --strip: #101217;
+          --tab: #2b2f3a;
+          --tab-idle: #1a1d24;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      a:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      header.hero {
+        padding: 56px 0 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .brand img {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 2.2rem;
+        line-height: 1.15;
+      }
+
+      .lead {
+        margin: 20px 0 0;
+        font-size: 1.2rem;
+        color: var(--muted);
+      }
+
+      .facts {
+        margin: 16px 0 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 10px;
+      }
+
+      .facts li {
+        padding: 3px 12px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--card);
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+
+      section {
+        margin: 0 0 20px;
+        padding: 26px 28px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+
+      h2 {
+        margin: 0 0 10px;
+        font-size: 1.35rem;
+      }
+
+      section p {
+        margin: 0 0 12px;
+      }
+
+      section p:last-child {
+        margin-bottom: 0;
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      /* An illustration of a tab strip */
+      .strip {
+        display: flex;
+        gap: 4px;
+        align-items: flex-end;
+        padding: 10px 10px 0;
+        background: var(--strip);
+        border-radius: 12px 12px 0 0;
+        overflow-x: auto;
+      }
+
+      .tab {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1 1 0;
+        min-width: 90px;
+        max-width: 200px;
+        padding: 9px 12px;
+        background: var(--tab-idle);
+        border-radius: 10px 10px 0 0;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      .tab span.title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .tab.active {
+        background: var(--tab);
+      }
+
+      .icon {
+        position: relative;
+        flex: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        background: #8a93a6;
+      }
+
+      .icon::after {
+        content: "";
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        width: 10px;
+        height: 10px;
+        border: 1.5px solid var(--tab);
+        border-radius: 50%;
+        background: var(--dot, transparent);
+      }
+
+      .tab:not(.active) .icon::after {
+        border-color: var(--tab-idle);
+      }
+
+      .tab .icon.plain::after {
+        display: none;
+      }
+
+      .page-bar {
+        height: 14px;
+        background: var(--tab);
+        border-radius: 0 0 12px 12px;
+        border: 1px solid var(--border);
+        border-top: none;
+      }
+
+      figure {
+        margin: 0;
+      }
+
+      figcaption {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      ul.points {
+        margin: 0;
+        padding-left: 1.2em;
+      }
+
+      ul.points li {
+        margin: 0 0 8px;
+      }
+
+      img.shot {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+
+      .shots {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .picker {
+        max-width: 340px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+      }
+
+      th,
+      td {
+        padding: 9px 10px;
+        text-align: left;
+        vertical-align: top;
+        border-top: 1px solid var(--border);
+      }
+
+      th {
+        width: 34%;
+        font-weight: 600;
+      }
+
+      code {
+        font: 0.92em ui-monospace, "SF Mono", Menlo, monospace;
+      }
+
+      ol {
+        margin: 0 0 12px;
+        padding-left: 1.3em;
+      }
+
+      footer {
+        padding: 12px 0 56px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 560px) {
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        section {
+          padding: 20px 18px;
+        }
+
+        th {
+          width: 40%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <div class="brand">
+          <img src="assets/icon.svg" alt="" width="64" height="64" />
+          <h1>Tab Labels</h1>
+        </div>
+        <p class="lead">
+          Tag your Firefox tabs with coloured labels, so you can see at a glance which ones are waiting, paused or
+          still to do.
+        </p>
+        <ul class="facts">
+          <li>Firefox 140 or newer, on desktop</li>
+          <li>No account, no tracking</li>
+          <li>Everything stays in your browser</li>
+        </ul>
+      </header>
+
+      <main>
+        <section aria-labelledby="see">
+          <h2 id="see">What it looks like</h2>
+          <figure>
+            <div class="strip" role="img" aria-label="Four browser tabs. Three have a label in front of the title and a coloured dot on the tab icon.">
+              <div class="tab active"><span class="icon" style="--dot: var(--orange)"></span><span class="title">⏳ Waiting · Inbox</span></div>
+              <div class="tab"><span class="icon" style="--dot: var(--blue)"></span><span class="title">⏸️ Paused · Report</span></div>
+              <div class="tab"><span class="icon" style="--dot: var(--green)"></span><span class="title">✏️ To do · Shopping</span></div>
+              <div class="tab"><span class="icon plain"></span><span class="title">Weather</span></div>
+            </div>
+            <div class="page-bar"></div>
+            <figcaption>
+              An illustration. The coloured dot sits on the corner of the tab icon, and the label's emoji and name
+              sit in front of the page title. You choose which of the three to show.
+            </figcaption>
+          </figure>
+        </section>
+
+        <section aria-labelledby="what">
+          <h2 id="what">What it does</h2>
+          <ul class="points">
+            <li><strong>Label a tab in two clicks.</strong> Right-click a tab, choose <em>Label tab</em>, pick a label. Choose <em>Remove label</em> to clear it.</li>
+            <li><strong>Three labels to start with:</strong> Waiting, Paused and To do. Add your own, each with an emoji, a colour and an optional name.</li>
+            <li><strong>Show it the way you like.</strong> Three separate switches: a coloured dot on the tab icon, the label name in the title, and the emoji in the title. Any combination works.</li>
+            <li><strong>Containers.</strong> Give a container a label, and every new tab opened in it gets that label automatically.</li>
+            <li><strong>An emoji picker</strong> with search. Your computer's own emoji menu works in its search box too.</li>
+            <li><strong>Move your labels around.</strong> Export your labels to a file and import them on another computer.</li>
+            <li><strong>Labels stay put.</strong> A tab keeps its label while you browse, and after Firefox restarts if Firefox restores your tabs.</li>
+            <li><strong>One button to tidy up.</strong> <em>Refresh labels on all tabs</em> takes the labels off every open tab and puts them back.</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="settings">
+          <h2 id="settings">The settings page</h2>
+          <p>Open it from the add-on's page in Firefox, or from <em>Tab Labels settings</em> at the bottom of the <em>Label tab</em> menu.</p>
+          <div class="shots">
+            <picture>
+              <source srcset="assets/settings-dark.png" media="(prefers-color-scheme: dark)" />
+              <img class="shot" src="assets/settings-light.png" alt="The settings page: switches for the dot, the title label and the emoji; a list of containers; and the list of labels with their emoji, name and colour." width="680" height="1292" />
+            </picture>
+            <figure>
+              <img class="shot picker" src="assets/emoji-picker.png" alt="The emoji picker: a search box and a grid of emoji in sections." width="340" height="375" />
+              <figcaption>The emoji picker opens when you click a label's emoji box.</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section id="privacy" aria-labelledby="privacy-h">
+          <h2 id="privacy-h">Privacy</h2>
+          <p><strong>Tab Labels collects no data.</strong> It has no accounts, no analytics and no server. Your labels and settings are saved in your own browser and go nowhere else.</p>
+          <p>The extension only reads and changes two things on a page: its title and its icon. It does not read what is on the page.</p>
+          <p>It makes one kind of network request. When the coloured dot is switched on, then for a tab that has a label it fetches that page's own icon from the same website, so it can draw the dot on it. Nothing else is requested, and nothing is sent about you.</p>
+        </section>
+
+        <section aria-labelledby="perm">
+          <h2 id="perm">Why it asks for these permissions</h2>
+          <table>
+            <tbody>
+              <tr><th scope="row">Access to all websites</th><td>To change the tab title and icon on any page you label.</td></tr>
+              <tr><th scope="row"><code>menus</code></th><td>To add <em>Label tab</em> to the tab's right-click menu.</td></tr>
+              <tr><th scope="row"><code>tabs</code></th><td>To find your open tabs and tell them to update.</td></tr>
+              <tr><th scope="row"><code>storage</code></th><td>To save your labels and settings in the browser.</td></tr>
+              <tr><th scope="row"><code>sessions</code></th><td>To remember each tab's label, including after Firefox restarts.</td></tr>
+              <tr><th scope="row"><code>contextualIdentities</code></th><td>To list your containers, so each can have a label.</td></tr>
+              <tr><th scope="row"><code>cookies</code></th><td>Only so Firefox tells the extension which container a tab belongs to. The extension does not read or change any cookie.</td></tr>
+              <tr><th scope="row"><code>scripting</code></th><td>To add the label code to tabs that were already open when the extension was installed or updated (the <em>Refresh</em> button).</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="get" aria-labelledby="get-h">
+          <h2 id="get-h">Get Tab Labels</h2>
+          <p>Tab Labels needs Firefox 140 or newer on a computer. It is not made for Firefox on Android.</p>
+          <ol>
+            <li>Open the <a href="https://github.com/moamstripes/tab-labels/releases?q=firefox">Releases page on GitHub</a> and choose the newest release named <em>Tab Labels for Firefox</em>.</li>
+            <li>Download the file that ends in <code>.xpi</code>. Mozilla has signed it, so Firefox accepts it.</li>
+            <li>Drag the file onto a Firefox window and confirm the permissions.</li>
+          </ol>
+          <p class="note">To update, download the newest <code>.xpi</code> and open it the same way. A Chrome version of the extension is on the same Releases page.</p>
+        </section>
+      </main>
+
+      <footer>
+        <p>Made by <a href="https://github.com/moamstripes">moamstripes</a>. <a href="https://github.com/moamstripes/tab-labels">Source code on GitHub</a>.</p>
+      </footer>
+    </div>
+  </body>
+</html>

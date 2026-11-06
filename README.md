@@ -13,6 +13,10 @@ Each folder has its own README with install steps, usage and a manual test check
 
 The Firefox add-on is registered on addons.mozilla.org as a private (unlisted) add-on. Its developer page, where versions are uploaded and signed, is <https://addons.mozilla.org/en-US/developers/addon/fdb422307dd04e4c91e8/> (needs the Mozilla account that owns it).
 
+## Website
+
+`docs/` is a one-page website for the Firefox extension (what it does, screenshots, privacy, permissions, how to install). It is plain HTML with no scripts or trackers, and GitHub Pages serves it from `main` and `/docs` once the repository is public: `https://moamstripes.github.io/tab-labels/`. Use that address as the add-on's homepage in the details on addons.mozilla.org. The screenshots are in `docs/assets/`; retake them when the settings page changes.
+
 ## Installing a release
 
 Releases are on the repository's **Releases** page. Tags are per browser, so each release is for one browser.
@@ -54,7 +58,7 @@ The number in the tag has to match `version` in that browser's `manifest.json`. 
 - **CI** (`.github/workflows/ci.yml`): on every push to `main` and every pull request, runs the unit tests and builds the package for both browsers.
 - **Release** (`.github/workflows/release.yml`): on a `firefox-v*` or `chrome-v*` tag, checks the version, runs that browser's tests, builds the zip, and creates a GitHub release with the zip attached and notes generated from the commits.
 
-Both workflows run on macOS runners because the tests use the macOS JavaScript engine. If the repository is private, macOS minutes cost more than Linux ones on GitHub's plans.
+Both workflows run on macOS runners because the tests use the macOS JavaScript engine. (macOS minutes are free for public repositories; for a private one they cost more than Linux minutes.)
 
 ### Signing the Firefox release (one-time setup)
 
@@ -73,3 +77,7 @@ To sign a version that was released earlier without a signed file, run the workf
 ### Not automated
 
 Publishing to the Chrome Web Store is not part of the workflows. It needs a Chrome Web Store developer account and its own credentials. The Chrome release is the zip for loading unpacked.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).

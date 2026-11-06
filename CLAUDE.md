@@ -1,6 +1,6 @@
 # Tab Labels: working notes
 
-A browser extension that tags tabs with coloured labels (emoji, optional name, colour), shown as a dot on the tab icon and/or an emoji and name in front of the tab title. It exists twice, once per browser, in one repository. Private GitHub repo `moamstripes/tab-labels`. Overview and release steps are in `README.md`; each browser folder has its own README with install steps and a manual test checklist.
+A browser extension that tags tabs with coloured labels (emoji, optional name, colour), shown as a dot on the tab icon and/or an emoji and name in front of the tab title. It exists twice, once per browser, in one repository. Public GitHub repo `moamstripes/tab-labels` (MIT licence; it was private until 06-11-2026, so release downloads and the website are public now). Overview and release steps are in `README.md`; each browser folder has its own README with install steps and a manual test checklist.
 
 ## Rules for every change
 
@@ -16,6 +16,7 @@ A browser extension that tags tabs with coloured labels (emoji, optional name, c
 firefox/   Manifest V3, event page (background.scripts), tab right-click menu, containers
 chrome/    Manifest V3, service worker, page and toolbar-icon menus, no containers
 scripts/   build.sh (zip a browser's runtime files), bump-version.sh
+docs/      one-page website for the Firefox extension (GitHub Pages, served from main /docs); screenshots in docs/assets
 .github/workflows/   ci.yml (tests on push and PRs), release.yml (tag -> GitHub release)
 ```
 

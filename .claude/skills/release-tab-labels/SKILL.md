@@ -5,7 +5,7 @@ description: Use whenever the Tab Labels extension gets a new version number (Fi
 
 # Release Tab Labels
 
-Standing instruction from the user: **when a version of the extension is updated, push it to GitHub and create a release for it.** That is already approved for this repository (`moamstripes/tab-labels`, private), so do not ask again for the push, the tags or the releases. Anything else outward-facing (publishing to the Chrome Web Store, listing on addons.mozilla.org, changing repository visibility) still needs asking.
+Standing instruction from the user: **when a version of the extension is updated, push it to GitHub and create a release for it.** That is already approved for this repository (`moamstripes/tab-labels`, public), so do not ask again for the push, the tags or the releases. Anything else outward-facing (publishing to the Chrome Web Store, listing on addons.mozilla.org, changing repository visibility) still needs asking.
 
 Work from `~/Documents/tab-labels`. Both browsers are normally released together, because updates are made to both.
 
