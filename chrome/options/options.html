@@ -15,6 +15,16 @@
           <h1>Tab Labels</h1>
           <p>Tag tabs with coloured labels. Everything stays in your browser.</p>
         </div>
+        <div class="page-controls">
+          <button id="mode-button" type="button" class="btn icon-btn mode-button" data-mode="light" title="Switch to dark mode" aria-label="Switch to dark mode">
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z" /></svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2.2m0 14.6v2.2M4.9 4.9l1.6 1.6m11 11 1.6 1.6M2.5 12h2.2m14.6 0h2.2M4.9 19.1l1.6-1.6m11-11 1.6-1.6" /></svg>
+          </button>
+          <button id="space-button" type="button" class="btn space-button">
+            <span class="when-plain">Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></span>
+            <span class="when-space">Land back <span aria-hidden="true">(︶︹︺)</span></span>
+          </button>
+        </div>
       </header>
 
       <div class="layout">
@@ -47,15 +57,6 @@
               <p class="hint">Takes the labels off every open tab and puts them back. Use it if a tab shows a label twice or a wrong one, or if tabs that were open when the extension was installed or updated show nothing.</p>
               <button id="refresh-tabs" type="button" class="btn">Refresh labels on all tabs</button>
             </div>
-          </section>
-          <section class="card space-card">
-            <label class="toggle">
-              <input type="checkbox" class="switch" id="space-toggle" />
-              <span class="toggle-text">
-                <strong>Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></strong>
-                <small>A pastel purple sky with little planets and stars.</small>
-              </span>
-            </label>
           </section>
         </aside>
 

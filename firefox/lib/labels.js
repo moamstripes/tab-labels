@@ -12,7 +12,7 @@
 
   // Every key the extension keeps in storage.local. displayMode is the pre-1.1
   // setting, read only so existing installs keep their choice.
-  const SETTINGS_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "displayMode", "spaceTheme"];
+  const SETTINGS_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "displayMode", "spaceTheme", "colorMode"];
 
   const DEFAULT_LABELS = [
     { id: "waiting", name: "Waiting", emoji: "⏳", colour: "#d98e04" },
@@ -26,6 +26,7 @@
       display: { favicon: true, title: true, emoji: true },
       containerRules: {},
       spaceTheme: false,
+      colorMode: "system",
     };
   }
 
@@ -93,6 +94,7 @@
     out.display = normaliseDisplay(raw);
     out.containerRules = normaliseRules(raw.containerRules);
     out.spaceTheme = raw.spaceTheme === true;
+    out.colorMode = raw.colorMode === "light" || raw.colorMode === "dark" ? raw.colorMode : "system";
     return out;
   }
 

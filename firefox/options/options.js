@@ -6,7 +6,8 @@ const statusEl = document.getElementById("status");
 const containersEl = document.getElementById("containers");
 const containersNote = document.getElementById("containers-note");
 const importFileEl = document.getElementById("import-file");
-const spaceToggle = document.getElementById("space-toggle");
+const spaceButton = document.getElementById("space-button");
+const modeButton = document.getElementById("mode-button");
 
 const TOGGLES = { showFavicon: "favicon", showTitle: "title", showEmoji: "emoji" };
 const IMPORT_MAX_BYTES = 256 * 1024;
@@ -30,7 +31,48 @@ function applySpace(on) {
   } catch (e) {
     // see above
   }
+  updateModeButton();
 }
+
+// Light or dark: follows the system until a choice is made with the sun/moon button here.
+const MODE_CACHE_KEY = "tab-labels-mode";
+try {
+  const cached = localStorage.getItem(MODE_CACHE_KEY);
+  if (cached === "light" || cached === "dark") document.documentElement.setAttribute("data-theme", cached);
+} catch (e) {
+  // see above
+}
+
+function effectiveMode() {
+  const chosen = document.documentElement.getAttribute("data-theme");
+  if (chosen) return chosen;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+// The button shows the mode you would switch to. In space the colours are fixed, so it rests.
+function updateModeButton() {
+  const dark = effectiveMode() === "dark";
+  const inSpace = document.documentElement.hasAttribute("data-space");
+  const label = inSpace ? "The colour mode does not apply in space. Land back to change it." : dark ? "Switch to light mode" : "Switch to dark mode";
+  modeButton.dataset.mode = dark ? "dark" : "light";
+  modeButton.title = label;
+  modeButton.setAttribute("aria-label", label);
+  modeButton.disabled = inSpace;
+}
+
+function applyMode(mode) {
+  if (mode === "light" || mode === "dark") document.documentElement.setAttribute("data-theme", mode);
+  else document.documentElement.removeAttribute("data-theme");
+  try {
+    localStorage.setItem(MODE_CACHE_KEY, mode);
+  } catch (e) {
+    // see above
+  }
+  updateModeButton();
+}
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", updateModeButton);
+updateModeButton();
 
 let rows = []; // { id: string | null, name, emoji, colour }
 let statusTimer = null;
@@ -282,10 +324,8 @@ async function load() {
   for (const input of document.querySelectorAll("input[data-key]")) {
     if (!flipped.has(input.dataset.key)) input.checked = settings.display[TOGGLES[input.dataset.key]];
   }
-  if (!flipped.has("spaceTheme")) {
-    spaceToggle.checked = settings.spaceTheme;
-    applySpace(settings.spaceTheme);
-  }
+  if (!flipped.has("spaceTheme")) applySpace(settings.spaceTheme);
+  if (!flipped.has("colorMode")) applyMode(settings.colorMode);
   render();
   await renderContainers(settings);
 }
@@ -334,10 +374,18 @@ for (const input of document.querySelectorAll("input[data-key]")) {
 
 load();
 
-spaceToggle.addEventListener("change", async () => {
+spaceButton.addEventListener("click", async () => {
   flipped.add("spaceTheme");
-  const on = spaceToggle.checked; // the value at the moment of the click, not whatever it is after the save
+  const on = !document.documentElement.hasAttribute("data-space"); // decided at the moment of the click
   applySpace(on);
   await browser.storage.local.set({ spaceTheme: on });
   setStatus(on ? "Welcome to space." : "Back on Earth.", false);
+});
+
+modeButton.addEventListener("click", async () => {
+  flipped.add("colorMode");
+  const next = effectiveMode() === "dark" ? "light" : "dark";
+  applyMode(next);
+  await browser.storage.local.set({ colorMode: next });
+  setStatus(next === "dark" ? "Dark mode." : "Light mode.", false);
 });

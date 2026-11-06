@@ -59,7 +59,7 @@ The current version is in each `manifest.json`; published versions are on the re
 ## Gotchas
 
 - Settings page layout: Labels first, switches in a left sidebar, import/export/reset as icon buttons in the Labels card header (ids `import`, `export`, `reset` are used by the script and the tests). The sidebar is sticky only in tall windows; keep it that way, a sticky element taller than the window hides its lower part.
-- "Take me to space" is the `spaceTheme` setting, applied as `data-space` on `<html>`, with the picture `options/space.svg` (identical copies in both browsers and in `docs/assets/`). Keep the cards light in that mode so dark mode stays readable.
+- Top right of the settings page: `#mode-button` (sun/moon, setting `colorMode`, applied as `data-theme` on `<html>`) and, under it, `#space-button` ("Take me to space" / "Land back", setting `spaceTheme`, applied as `data-space`; the picture is `options/space.svg`, identical copies in both browsers and in `docs/assets/`). Space keeps the cards light so dark mode stays readable, and the sun/moon button rests while in space. The website has the same two controls in CSS only (no scripts).
 - `firefox/listing.md` is a ready-to-paste draft of the addons.mozilla.org listing (not part of the package). Keep it in step with the website text.
 
 - Tabs that were open before the extension was installed or updated may have no content script. The settings page button "Refresh labels on all tabs" sends `reset` to each tab (remove everything the extension put there, then re-apply) and injects the script, with the `scripting` permission, where there is none. A content script must answer `refresh` and `reset`, otherwise the button cannot tell a tab that has it from one that does not.

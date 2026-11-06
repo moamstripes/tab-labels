@@ -70,13 +70,6 @@ test("settings page (Firefox): Containers come after Labels", () => {
   assertTrue(html.indexOf('id="containers"') > html.indexOf('id="rows"'), "Containers must be below Labels");
 });
 
-test("settings page has the 'Take me to space' toggle in the sidebar, with the decoration hidden from screen readers", () => {
-  const html = readFile("options/options.html");
-  const aside = html.slice(html.indexOf("<aside"), html.indexOf("</aside>"));
-  assertTrue(aside.includes('id="space-toggle"'), "the toggle is not in the sidebar");
-  assertTrue(aside.includes("Take me to space"), "the toggle text is missing");
-  assertTrue(/<span aria-hidden="true">[^<]*✧<\/span>/.test(aside), "the decorative symbols must be aria-hidden");
-});
 
 test("the space theme's background picture exists and the stylesheet uses it", () => {
   assertTrue(fileExists("options/space.svg"), "options/space.svg is missing");
@@ -84,4 +77,34 @@ test("the space theme's background picture exists and the stylesheet uses it", (
   assertTrue(css.includes('url("space.svg")') && css.includes(":root[data-space]"), "the stylesheet does not use space.svg");
   const svg = readFile("options/space.svg");
   assertTrue(svg.includes("<svg") && !svg.includes("<script"), "space.svg must be a plain picture with no script");
+});
+
+test("settings page: the sun/moon button and the space button are at the top right, the space button under the sun/moon", () => {
+  const html = readFile("options/options.html");
+  const header = html.slice(html.indexOf('<header class="page-header">'), html.indexOf("</header>"));
+  const controls = header.slice(header.indexOf('class="page-controls"'));
+  const mode = controls.indexOf('id="mode-button"');
+  const space = controls.indexOf('id="space-button"');
+  assertTrue(mode >= 0 && space > mode, "the sun/moon button must come first, then the space button");
+  const button = controls.slice(space, controls.indexOf("</button>", space));
+  assertTrue(button.includes("Take me to space") && button.includes("Land back"), "the space button needs both texts");
+  assertTrue(button.includes("(\ufe36\ufe39\ufe3a)"), "the 'Land back' face is missing");
+  assertTrue(!button.includes("<small"), "the space button has no description");
+  assertTrue(/<span aria-hidden="true">[^<]*\u2727<\/span>/.test(button) && /<span aria-hidden="true">\([^<]*\)<\/span>/.test(button), "the decorative symbols must be aria-hidden");
+  const aside = html.slice(html.indexOf("<aside"), html.indexOf("</aside>"));
+  assertTrue(!aside.includes("space") && !aside.includes("Space"), "nothing about space belongs in the sidebar any more");
+});
+
+test("settings page: the sun/moon button has both icons and a name", () => {
+  const html = readFile("options/options.html");
+  const m = html.match(/<button id="mode-button"[^>]*>/);
+  assertTrue(!!m && /aria-label="[^"]+"/.test(m[0]) && /title="[^"]+"/.test(m[0]), "the button needs a title and an aria-label");
+  const body = html.slice(html.indexOf('id="mode-button"'), html.indexOf("</button>", html.indexOf('id="mode-button"')));
+  assertTrue(body.includes("icon-moon") && body.includes("icon-sun"), "both the sun and the moon icons must be there");
+});
+
+test("settings page: a light and a dark choice exist in the stylesheet, next to the automatic one", () => {
+  const css = readFile("options/options.css");
+  assertTrue(css.includes(':root[data-theme="dark"]') && css.includes(':root[data-theme="light"]'), "manual light and dark are missing");
+  assertTrue(css.includes(':root:not([data-theme="light"])'), "the automatic dark colours must give way to an explicit light choice");
 });

@@ -153,7 +153,7 @@ test("isColour accepts only #rrggbb", () => {
 test("SETTINGS_KEYS lists every stored setting", () => {
   assertEqual(
     TabLabels.SETTINGS_KEYS,
-    ["labels", "showFavicon", "showTitle", "showEmoji", "spaceTheme"]
+    ["labels", "showFavicon", "showTitle", "showEmoji", "spaceTheme", "colorMode"]
   );
 });
 
@@ -311,5 +311,18 @@ test("the space theme is off by default and read as a plain on/off value", () =>
 test("anything that is not exactly true leaves the space theme off", () => {
   for (const value of ["yes", 1, "true", null, {}, []]) {
     assertEqual(TabLabels.normaliseSettings({ spaceTheme: value }).spaceTheme, false);
+  }
+});
+
+test("the colour mode follows the system until the user picks light or dark", () => {
+  assertEqual(TabLabels.defaultSettings().colorMode, "system");
+  assertEqual(TabLabels.normaliseSettings({}).colorMode, "system");
+  assertEqual(TabLabels.normaliseSettings({ colorMode: "light" }).colorMode, "light");
+  assertEqual(TabLabels.normaliseSettings({ colorMode: "dark" }).colorMode, "dark");
+});
+
+test("any other colour mode value falls back to the system setting", () => {
+  for (const value of ["Dark", "auto", "", 1, true, null, {}]) {
+    assertEqual(TabLabels.normaliseSettings({ colorMode: value }).colorMode, "system");
   }
 });

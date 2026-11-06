@@ -26,7 +26,7 @@ What it does
 - Export your labels to a file and import them on another computer.
 - A tab keeps its label while you browse, and after Firefox restarts if Firefox restores your tabs.
 - One button, Refresh labels on all tabs, takes the labels off every open tab and puts them back.
-- A little extra: switch on "Take me to space" in the settings for a pastel purple sky with little planets and stars.
+- A little extra: press "Take me to space" at the top right of the settings for a pastel purple sky with little planets and stars (and "Land back" to return). A sun/moon button next to it switches between light and dark mode.
 
 Privacy
 Tab Labels collects no data. It has no accounts, no analytics and no server. Your labels and settings are saved in your own browser. The extension only reads and changes two things on a page: its title and its icon. When the coloured dot is switched on, then for a tab that has a label it fetches that page's own icon from the same website, so it can draw the dot on it. Nothing else is requested, and nothing is sent about you.

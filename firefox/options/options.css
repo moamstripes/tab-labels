@@ -15,8 +15,10 @@
   font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+/* Dark colours: used when the system is dark (unless light was chosen on this page),
+   and when dark was chosen on this page. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #14161b;
     --card: #1f222a;
     --text: #eceef3;
@@ -29,6 +31,25 @@
     --danger: #ff7a6b;
     --shadow: none;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14161b;
+  --card: #1f222a;
+  --text: #eceef3;
+  --muted: #a2a8b6;
+  --border: #333845;
+  --field: #171a20;
+  --accent: #6c9cf0;
+  --accent-text: #10131a;
+  --off: #4a4f5e;
+  --danger: #ff7a6b;
+  --shadow: none;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 * {
@@ -499,22 +520,61 @@ main {
   stroke-linejoin: round;
 }
 
-/* A second card in the sidebar, and the "Take me to space" theme */
+/* Top right of the page: the light/dark button, and the space button under it */
 
-.sidebar .card + .card {
-  margin-top: 18px;
+.page-controls {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 
-.space-card {
-  padding-top: 16px;
-  padding-bottom: 16px;
+.mode-button .icon-sun {
+  display: none;
 }
 
-.space-card .toggle {
-  margin: 0;
-  padding: 0;
-  border-top: none;
+.mode-button[data-mode="dark"] .icon-moon {
+  display: none;
 }
+
+.mode-button[data-mode="dark"] .icon-sun {
+  display: inline;
+}
+
+.mode-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.space-button {
+  border-radius: 999px;
+  padding: 7px 16px;
+}
+
+.space-button .when-space {
+  display: none;
+}
+
+:root[data-space] .space-button .when-plain {
+  display: none;
+}
+
+:root[data-space] .space-button .when-space {
+  display: inline;
+}
+
+@media (max-width: 560px) {
+  .page-controls {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* "Take me to space" theme */
 
 :root[data-space] {
   color-scheme: light;

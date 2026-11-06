@@ -15,7 +15,7 @@ The Firefox add-on is registered on addons.mozilla.org as a private (unlisted) a
 
 ## Website
 
-`docs/` is a one-page website for the Firefox extension (what it does, screenshots, privacy, permissions, how to install). It is plain HTML with no scripts or trackers, and GitHub Pages serves it from `main` and `/docs` once the repository is public: `https://moamstripes.github.io/tab-labels/`. It has a "Take me to space" switch of its own (CSS only, no scripts). Use that address as the add-on's homepage in the details on addons.mozilla.org; `firefox/listing.md` is a draft of the rest of the listing. The screenshots are in `docs/assets/`; retake them when the settings page changes.
+`docs/` is a one-page website for the Firefox extension (what it does, screenshots, privacy, permissions, how to install). It is plain HTML with no scripts or trackers, and GitHub Pages serves it from `main` and `/docs` once the repository is public: `https://moamstripes.github.io/tab-labels/`. It has a sun/moon button and a "Take me to space" button of its own at the top right (CSS only, no scripts). Use that address as the add-on's homepage in the details on addons.mozilla.org; `firefox/listing.md` is a draft of the rest of the listing. The screenshots are in `docs/assets/`; retake them when the settings page changes.
 
 ## Installing a release
 

@@ -43,6 +43,39 @@
         }
       }
 
+      /* The sun/moon button at the top right: ticked means the opposite of what the computer asks for. */
+      @media (prefers-color-scheme: light) {
+        :root:has(#mode:checked) {
+          color-scheme: dark;
+          --bg: #14161b;
+          --card: #1f222a;
+          --text: #eceef3;
+          --muted: #a7adbb;
+          --border: #333845;
+          --accent: #7aa6f5;
+          --accent-text: #10131a;
+          --strip: #101217;
+          --tab: #2b2f3a;
+          --tab-idle: #1a1d24;
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:has(#mode:checked) {
+          color-scheme: light;
+          --bg: #f3f4f8;
+          --card: #ffffff;
+          --text: #1c1e26;
+          --muted: #5a6070;
+          --border: #dfe2ea;
+          --accent: #3d6fc4;
+          --accent-text: #ffffff;
+          --strip: #dde1ea;
+          --tab: #ffffff;
+          --tab-idle: #eceef4;
+        }
+      }
+
       * {
         box-sizing: border-box;
       }
@@ -288,59 +321,115 @@
         color: var(--muted);
       }
 
-      .space-toggle {
+      .hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .page-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+      }
+
+      .vh {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+      }
+
+      .mode-toggle {
         display: inline-flex;
         align-items: center;
-        gap: 12px;
-        margin: 18px 0 0;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        color: var(--muted);
         cursor: pointer;
       }
 
-      .space-toggle input {
-        position: absolute;
-        opacity: 0;
-        width: 1px;
-        height: 1px;
+      .mode-toggle:hover {
+        color: var(--text);
+        background: var(--card);
       }
 
-      .switch-ui {
-        position: relative;
-        flex: none;
-        width: 42px;
-        height: 24px;
-        border-radius: 12px;
-        background: #9aa1b2;
-        transition: background 0.15s;
+      .mode-toggle svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
 
-      .switch-ui::after {
-        content: "";
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: #ffffff;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        transition: transform 0.15s;
+      /* Shows the mode you would switch to: the moon in light mode, the sun in dark mode. */
+      .mode-toggle .icon-sun {
+        display: none;
       }
 
-      .space-toggle input:checked + .switch-ui {
-        background: #7b5fd6;
+      @media (prefers-color-scheme: dark) {
+        .mode-toggle .icon-sun {
+          display: inline;
+        }
+
+        .mode-toggle .icon-moon {
+          display: none;
+        }
       }
 
-      .space-toggle input:checked + .switch-ui::after {
-        transform: translateX(18px);
+      @media (prefers-color-scheme: light) {
+        :root:has(#mode:checked) .mode-toggle .icon-sun {
+          display: inline;
+        }
+
+        :root:has(#mode:checked) .mode-toggle .icon-moon {
+          display: none;
+        }
       }
 
-      .space-toggle input:focus-visible + .switch-ui {
+      @media (prefers-color-scheme: dark) {
+        :root:has(#mode:checked) .mode-toggle .icon-sun {
+          display: none;
+        }
+
+        :root:has(#mode:checked) .mode-toggle .icon-moon {
+          display: inline;
+        }
+      }
+
+      .space-button {
+        padding: 7px 16px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--text);
+        font-size: 0.92rem;
+        line-height: 1.4;
+        cursor: pointer;
+      }
+
+      .space-button:hover {
+        border-color: var(--accent);
+      }
+
+      .space-button .when-space {
+        display: none;
+      }
+
+      .mode-toggle:has(input:focus-visible),
+      .space-button:has(input:focus-visible) {
         outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
 
       @supports not selector(:has(*)) {
-        .space-toggle {
+        .page-controls {
           display: none;
         }
       }
@@ -359,15 +448,21 @@
         --tab-idle: #f0eafc;
       }
 
-      :root:has(#space:checked) body {
-        background: #cdbdf0 url("assets/space.svg") center / cover no-repeat fixed;
+      :root:has(#space:checked) .space-button .when-plain {
+        display: none;
       }
 
-      @media (prefers-reduced-motion: reduce) {
-        .switch-ui,
-        .switch-ui::after {
-          transition: none;
-        }
+      :root:has(#space:checked) .space-button .when-space {
+        display: inline;
+      }
+
+      :root:has(#space:checked) .mode-toggle {
+        opacity: 0.4;
+        pointer-events: none;
+      }
+
+      :root:has(#space:checked) body {
+        background: #cdbdf0 url("assets/space.svg") center / cover no-repeat fixed;
       }
 
       @media (max-width: 560px) {
@@ -388,9 +483,24 @@
   <body>
     <div class="wrap">
       <header class="hero">
-        <div class="brand">
-          <img src="assets/icon.svg" alt="" width="64" height="64" />
-          <h1>Tab Labels</h1>
+        <div class="hero-top">
+          <div class="brand">
+            <img src="assets/icon.svg" alt="" width="64" height="64" />
+            <h1>Tab Labels</h1>
+          </div>
+          <div class="page-controls">
+            <label class="mode-toggle" title="Switch between light and dark mode">
+              <input type="checkbox" id="mode" class="vh" />
+              <span class="vh">Switch between light and dark mode</span>
+              <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z" /></svg>
+              <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2.2m0 14.6v2.2M4.9 4.9l1.6 1.6m11 11 1.6 1.6M2.5 12h2.2m14.6 0h2.2M4.9 19.1l1.6-1.6m11-11 1.6-1.6" /></svg>
+            </label>
+            <label class="space-button">
+              <input type="checkbox" id="space" class="vh" />
+              <span class="when-plain">Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></span>
+              <span class="when-space">Land back <span aria-hidden="true">(︶︹︺)</span></span>
+            </label>
+          </div>
         </div>
         <p class="lead">
           Tag your Firefox tabs with coloured labels, so you can see at a glance which ones are waiting, paused or
@@ -405,11 +515,6 @@
           <li>No account, no tracking</li>
           <li>Everything stays in your browser</li>
         </ul>
-        <label class="space-toggle">
-          <input type="checkbox" id="space" />
-          <span class="switch-ui" aria-hidden="true"></span>
-          <span>Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></span>
-        </label>
       </header>
 
       <main>
@@ -440,7 +545,7 @@
             <li><strong>An emoji picker</strong> with search. Your computer's own emoji menu works in its search box too.</li>
             <li><strong>Move your labels around.</strong> Export your labels to a file and import them on another computer.</li>
             <li><strong>Labels stay put.</strong> A tab keeps its label while you browse, and after Firefox restarts if Firefox restores your tabs.</li>
-            <li><strong>A little extra.</strong> Flip <em>Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></em> in the settings, or at the top of this page, for a pastel purple sky with little planets and stars.</li>
+            <li><strong>A little extra.</strong> Press <em>Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></em> at the top right of the settings, or of this page, for a pastel purple sky with little planets and stars. <em>Land back <span aria-hidden="true">(︶︹︺)</span></em> takes you home. The sun and moon beside it switch between light and dark mode.</li>
             <li><strong>One button to tidy up.</strong> <em>Refresh labels on all tabs</em> takes the labels off every open tab and puts them back.</li>
           </ul>
         </section>
@@ -451,7 +556,7 @@
           <div class="shots">
             <picture>
               <source srcset="assets/settings-dark.png" media="(prefers-color-scheme: dark)" />
-              <img class="shot" src="assets/settings-light.png" alt="The settings page: the list of labels with their emoji, name and colour, and a list of containers, with a sidebar of switches for the dot, the title label and the emoji." width="920" height="941" />
+              <img class="shot" src="assets/settings-light.png" alt="The settings page: the list of labels with their emoji, name and colour, and a list of containers, with a sidebar of switches for the dot, the title label and the emoji." width="920" height="968" />
             </picture>
             <figure>
               <img class="shot picker" src="assets/emoji-picker.png" alt="The emoji picker: a search box and a grid of emoji in sections." width="340" height="375" />
