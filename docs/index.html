@@ -282,6 +282,94 @@
         font-size: 0.9rem;
       }
 
+
+      .origin {
+        margin: 12px 0 0;
+        color: var(--muted);
+      }
+
+      .space-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin: 18px 0 0;
+        cursor: pointer;
+      }
+
+      .space-toggle input {
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+      }
+
+      .switch-ui {
+        position: relative;
+        flex: none;
+        width: 42px;
+        height: 24px;
+        border-radius: 12px;
+        background: #9aa1b2;
+        transition: background 0.15s;
+      }
+
+      .switch-ui::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        transition: transform 0.15s;
+      }
+
+      .space-toggle input:checked + .switch-ui {
+        background: #7b5fd6;
+      }
+
+      .space-toggle input:checked + .switch-ui::after {
+        transform: translateX(18px);
+      }
+
+      .space-toggle input:focus-visible + .switch-ui {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      @supports not selector(:has(*)) {
+        .space-toggle {
+          display: none;
+        }
+      }
+
+      /* "Take me to space": a pastel purple sky with little planets and stars */
+      :root:has(#space:checked) {
+        color-scheme: light;
+        --bg: #cdbdf0;
+        --card: rgba(255, 255, 255, 0.9);
+        --text: #2b2347;
+        --muted: #5d567f;
+        --border: rgba(110, 90, 170, 0.3);
+        --accent: #5b43b8;
+        --strip: #e6defa;
+        --tab: #ffffff;
+        --tab-idle: #f0eafc;
+      }
+
+      :root:has(#space:checked) body {
+        background: #cdbdf0 url("assets/space.svg") center / cover no-repeat fixed;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .switch-ui,
+        .switch-ui::after {
+          transition: none;
+        }
+      }
+
       @media (max-width: 560px) {
         h1 {
           font-size: 1.8rem;
@@ -308,11 +396,20 @@
           Tag your Firefox tabs with coloured labels, so you can see at a glance which ones are waiting, paused or
           still to do.
         </p>
+        <p class="origin">
+          Initially built for developers who want to label multiple environments in multiple Firefox Containers, and
+          manage the status of pull requests and merge requests.
+        </p>
         <ul class="facts">
           <li>Firefox 140 or newer, on desktop</li>
           <li>No account, no tracking</li>
           <li>Everything stays in your browser</li>
         </ul>
+        <label class="space-toggle">
+          <input type="checkbox" id="space" />
+          <span class="switch-ui" aria-hidden="true"></span>
+          <span>Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></span>
+        </label>
       </header>
 
       <main>
@@ -339,25 +436,30 @@
             <li><strong>Label a tab in two clicks.</strong> Right-click a tab, choose <em>Label tab</em>, pick a label. Choose <em>Remove label</em> to clear it.</li>
             <li><strong>Three labels to start with:</strong> Waiting, Paused and To do. Add your own, each with an emoji, a colour and an optional name.</li>
             <li><strong>Show it the way you like.</strong> Three separate switches: a coloured dot on the tab icon, the label name in the title, and the emoji in the title. Any combination works.</li>
-            <li><strong>Containers.</strong> Give a container a label, and every new tab opened in it gets that label automatically.</li>
+            <li><strong>Containers.</strong> Give a container a label, and every new tab opened in it gets that label automatically. It works well alongside <a href="https://addons.mozilla.org/en-US/firefox/addon/container-bookmarks/" rel="noopener">Container Bookmarks</a>, a separate add-on that opens bookmarks in a container of your choice: a bookmark opens in its container and, once you have picked a label for that container, arrives already labelled. Tab Labels is not affiliated with Container Bookmarks.</li>
             <li><strong>An emoji picker</strong> with search. Your computer's own emoji menu works in its search box too.</li>
             <li><strong>Move your labels around.</strong> Export your labels to a file and import them on another computer.</li>
             <li><strong>Labels stay put.</strong> A tab keeps its label while you browse, and after Firefox restarts if Firefox restores your tabs.</li>
+            <li><strong>A little extra.</strong> Flip <em>Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></em> in the settings, or at the top of this page, for a pastel purple sky with little planets and stars.</li>
             <li><strong>One button to tidy up.</strong> <em>Refresh labels on all tabs</em> takes the labels off every open tab and puts them back.</li>
           </ul>
         </section>
 
         <section aria-labelledby="settings">
           <h2 id="settings">The settings page</h2>
-          <p>Open it from the add-on's page in Firefox, or from <em>Tab Labels settings</em> at the bottom of the <em>Label tab</em> menu.</p>
+          <p>Open it from the add-on's page in Firefox, or from <em>Tab Labels settings</em> at the bottom of the <em>Label tab</em> menu. Your labels come first. The switches for how labels look are in the sidebar, and the small icons at the top right of the Labels card import, export and reset your labels.</p>
           <div class="shots">
             <picture>
               <source srcset="assets/settings-dark.png" media="(prefers-color-scheme: dark)" />
-              <img class="shot" src="assets/settings-light.png" alt="The settings page: switches for the dot, the title label and the emoji; a list of containers; and the list of labels with their emoji, name and colour." width="680" height="1292" />
+              <img class="shot" src="assets/settings-light.png" alt="The settings page: the list of labels with their emoji, name and colour, and a list of containers, with a sidebar of switches for the dot, the title label and the emoji." width="920" height="941" />
             </picture>
             <figure>
               <img class="shot picker" src="assets/emoji-picker.png" alt="The emoji picker: a search box and a grid of emoji in sections." width="340" height="375" />
               <figcaption>The emoji picker opens when you click a label's emoji box.</figcaption>
+            </figure>
+            <figure>
+              <img class="shot" src="assets/settings-space.png" alt="The settings page after switching on 'Take me to space': the same cards on a pastel purple sky with little planets and stars." width="1200" height="775" />
+              <figcaption>The same page after flipping <em>Take me to space</em>.</figcaption>
             </figure>
           </div>
         </section>

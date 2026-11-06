@@ -130,3 +130,10 @@ This folder is the Chrome port of the Firefox extension, with the same name, set
 **Browser differences.** Firefox kills the old script on update, so only leftovers remain and the new code removes them. Chrome leaves the old script running in open tabs, cut off from the extension, and its observer keeps re-adding its old prefix; only a reload of the tab removes it (needed once, when updating from a version before 1.3.1). Chrome also clears `storage.session`, so per-tab labels are lost on update.
 
 **Settings page icon.** `icons/label.svg` (the 🏷️ emoji) is the favicon of the settings page.
+
+## Settings page layout, icons and the space theme (1.4.0, same in both browsers)
+
+- **Layout.** A two-column grid: the main column holds Labels first and, in Firefox, Containers below it; a sidebar on the left holds the three display switches, their explanations and the Refresh button, and below that the "Take me to space" card. The sidebar is sticky only when the window is at least 760 pixels tall and 821 wide (a sticky element taller than the window would hide its lower part); below 821 pixels wide the grid becomes one column with the sidebar first and not sticky.
+- **Icon buttons.** Import, export and reset are 34 pixel icon buttons (inline SVG, `currentColor`) in the Labels card header, each with a `title` and an `aria-label`. Their ids and behaviour are unchanged. Reset still asks for confirmation.
+- **Take me to space.** A switch (`#space-toggle`) saved as `spaceTheme` in `storage.local` (default false, only `true` turns it on). It sets `data-space` on `<html>`; `options.css` overrides the colour variables under `:root[data-space]` (light colours, purple accent, so dark mode does not make it unreadable) and sets `options/space.svg` as the page background. The value is also kept in `localStorage` so the page does not flash its plain look before storage answers. The toggle text is "Take me to space" followed by decorative symbols marked `aria-hidden`.
+- **Website.** `docs/index.html` has the same toggle, done in CSS only (`:root:has(#space:checked)`), hidden where `:has` is unsupported. `docs/assets/space.svg` is the same picture.

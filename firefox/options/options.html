@@ -17,62 +17,85 @@
         </div>
       </header>
 
-      <section class="card">
-        <h2>Show labels</h2>
-        <p class="hint">Choose what appears on a labelled tab. Changes apply straight away.</p>
-        <label class="toggle">
-          <input type="checkbox" class="switch" data-key="showFavicon" />
-          <span class="toggle-text">
-            <strong>Favicon bubble</strong>
-            <small>A coloured dot in the top-left corner of the tab icon.</small>
-          </span>
-        </label>
-        <label class="toggle">
-          <input type="checkbox" class="switch" data-key="showTitle" />
-          <span class="toggle-text">
-            <strong>Title label</strong>
-            <small>The label name in front of the page title.</small>
-          </span>
-        </label>
-        <label class="toggle">
-          <input type="checkbox" class="switch" data-key="showEmoji" />
-          <span class="toggle-text">
-            <strong>Emoji</strong>
-            <small>The label emoji in front of the page title. Works on its own or with the title label.</small>
-          </span>
-        </label>
-        <div class="refresh-row">
-          <p class="hint">Takes the labels off every open tab and puts them back. Use it if a tab shows a label twice or a wrong one, or if tabs that were open when the extension was installed or updated show nothing.</p>
-          <button id="refresh-tabs" type="button" class="btn">Refresh labels on all tabs</button>
-        </div>
-      </section>
+      <div class="layout">
+        <aside class="sidebar" aria-label="Display options">
+          <section class="card">
+            <h2>Show labels</h2>
+            <p class="hint">Choose what appears on a labelled tab. Changes apply straight away.</p>
+            <label class="toggle">
+              <input type="checkbox" class="switch" data-key="showFavicon" />
+              <span class="toggle-text">
+                <strong>Favicon bubble</strong>
+                <small>A coloured dot in the top-left corner of the tab icon.</small>
+              </span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" class="switch" data-key="showTitle" />
+              <span class="toggle-text">
+                <strong>Title label</strong>
+                <small>The label name in front of the page title.</small>
+              </span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" class="switch" data-key="showEmoji" />
+              <span class="toggle-text">
+                <strong>Emoji</strong>
+                <small>The label emoji in front of the page title. Works on its own or with the title label.</small>
+              </span>
+            </label>
+            <div class="refresh-row">
+              <p class="hint">Takes the labels off every open tab and puts them back. Use it if a tab shows a label twice or a wrong one, or if tabs that were open when the extension was installed or updated show nothing.</p>
+              <button id="refresh-tabs" type="button" class="btn">Refresh labels on all tabs</button>
+            </div>
+          </section>
+          <section class="card space-card">
+            <label class="toggle">
+              <input type="checkbox" class="switch" id="space-toggle" />
+              <span class="toggle-text">
+                <strong>Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></strong>
+                <small>A pastel purple sky with little planets and stars.</small>
+              </span>
+            </label>
+          </section>
+        </aside>
 
-      <section class="card">
-        <h2>Containers</h2>
-        <p class="hint">
-          New tabs opened in a container get the label chosen here. A tab you label or unlabel yourself is left
-          alone. When you pick a label, open tabs in that container that have no label get it too.
-        </p>
-        <ul id="containers" class="list"></ul>
-        <p id="containers-note" class="hint"></p>
-      </section>
+        <div class="content">
+          <section class="card">
+            <div class="card-head">
+              <h2>Labels</h2>
+              <div class="card-tools">
+                <button id="import" type="button" class="btn icon-btn" title="Import labels from a file" aria-label="Import labels from a file">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3" /></svg>
+                </button>
+                <button id="export" type="button" class="btn icon-btn" title="Export labels to a file" aria-label="Export labels to a file">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 0L8 7m4-4 4 4M4 17v3h16v-3" /></svg>
+                </button>
+                <button id="reset" type="button" class="btn icon-btn" title="Reset labels to the defaults" aria-label="Reset labels to the defaults">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" /></svg>
+                </button>
+                <input id="import-file" type="file" accept=".json,application/json" hidden />
+              </div>
+            </div>
+            <p class="hint">Each label has an emoji, a colour and an optional name. Changes apply after you save.</p>
+            <ul id="rows" class="list"></ul>
+            <p id="rows-empty" class="hint" hidden>No labels yet. Add one, or import a file.</p>
+            <div class="actions">
+              <button id="add" type="button" class="btn">Add label</button>
+              <button id="save" type="button" class="btn primary">Save labels</button>
+            </div>
+          </section>
 
-      <section class="card">
-        <h2>Labels</h2>
-        <p class="hint">Each label has an emoji, a colour and an optional name. Changes apply after you save.</p>
-        <ul id="rows" class="list"></ul>
-        <p id="rows-empty" class="hint" hidden>No labels yet. Add one, or import a file.</p>
-        <div class="actions">
-          <button id="add" type="button" class="btn">Add label</button>
-          <button id="save" type="button" class="btn primary">Save labels</button>
+          <section class="card">
+            <h2>Containers</h2>
+            <p class="hint">
+              New tabs opened in a container get the label chosen here. A tab you label or unlabel yourself is left
+              alone. When you pick a label, open tabs in that container that have no label get it too.
+            </p>
+            <ul id="containers" class="list"></ul>
+            <p id="containers-note" class="hint"></p>
+          </section>
         </div>
-        <div class="tools">
-          <button id="import" type="button" class="btn ghost">Import from file</button>
-          <button id="export" type="button" class="btn ghost">Export to file</button>
-          <button id="reset" type="button" class="btn ghost">Reset to defaults</button>
-          <input id="import-file" type="file" accept=".json,application/json" hidden />
-        </div>
-      </section>
+      </div>
     </main>
     <div id="status" role="status" aria-live="polite"></div>
     <script src="../lib/labels.js"></script>

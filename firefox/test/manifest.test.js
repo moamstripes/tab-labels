@@ -40,3 +40,48 @@ test("settings page has a favicon that points at a real file", () => {
   assertTrue(!!match, "options.html has no <link rel=\"icon\">");
   assertTrue(fileExists("options/" + match[1]), "favicon file missing: " + match[1]);
 });
+
+test("settings page: switches and Refresh are in a sidebar, labels are in the main column", () => {
+  const html = readFile("options/options.html");
+  const start = html.indexOf("<aside");
+  const end = html.indexOf("</aside>");
+  assertTrue(start >= 0 && end > start, "there is no sidebar");
+  const aside = html.slice(start, end);
+  for (const key of ["showFavicon", "showTitle", "showEmoji"]) {
+    assertTrue(aside.includes('data-key="' + key + '"'), key + " is not in the sidebar");
+  }
+  assertTrue(aside.includes('id="refresh-tabs"'), "the Refresh button is not in the sidebar");
+  assertTrue(html.indexOf('id="rows"') > end, "the label list must be in the main column, not the sidebar");
+});
+
+test("settings page: import, export and reset are icon buttons with names, at the top of the Labels card", () => {
+  const html = readFile("options/options.html");
+  const head = html.slice(html.indexOf('class="card-head"'), html.indexOf('id="rows"'));
+  assertTrue(head.includes("<h2>Labels</h2>"), "the buttons must sit in the Labels card header");
+  for (const id of ["import", "export", "reset"]) {
+    const m = head.match(new RegExp('<button id="' + id + '"[^>]*>'));
+    assertTrue(!!m, id + " button is not in the Labels card header");
+    assertTrue(/aria-label="[^"]+"/.test(m[0]) && /title="[^"]+"/.test(m[0]), id + " needs a title and an aria-label");
+  }
+});
+
+test("settings page (Firefox): Containers come after Labels", () => {
+  const html = readFile("options/options.html");
+  assertTrue(html.indexOf('id="containers"') > html.indexOf('id="rows"'), "Containers must be below Labels");
+});
+
+test("settings page has the 'Take me to space' toggle in the sidebar, with the decoration hidden from screen readers", () => {
+  const html = readFile("options/options.html");
+  const aside = html.slice(html.indexOf("<aside"), html.indexOf("</aside>"));
+  assertTrue(aside.includes('id="space-toggle"'), "the toggle is not in the sidebar");
+  assertTrue(aside.includes("Take me to space"), "the toggle text is missing");
+  assertTrue(/<span aria-hidden="true">[^<]*✧<\/span>/.test(aside), "the decorative symbols must be aria-hidden");
+});
+
+test("the space theme's background picture exists and the stylesheet uses it", () => {
+  assertTrue(fileExists("options/space.svg"), "options/space.svg is missing");
+  const css = readFile("options/options.css");
+  assertTrue(css.includes('url("space.svg")') && css.includes(":root[data-space]"), "the stylesheet does not use space.svg");
+  const svg = readFile("options/space.svg");
+  assertTrue(svg.includes("<svg") && !svg.includes("<script"), "space.svg must be a plain picture with no script");
+});

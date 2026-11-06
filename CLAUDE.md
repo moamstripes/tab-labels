@@ -58,6 +58,10 @@ The current version is in each `manifest.json`; published versions are on the re
 
 ## Gotchas
 
+- Settings page layout: Labels first, switches in a left sidebar, import/export/reset as icon buttons in the Labels card header (ids `import`, `export`, `reset` are used by the script and the tests). The sidebar is sticky only in tall windows; keep it that way, a sticky element taller than the window hides its lower part.
+- "Take me to space" is the `spaceTheme` setting, applied as `data-space` on `<html>`, with the picture `options/space.svg` (identical copies in both browsers and in `docs/assets/`). Keep the cards light in that mode so dark mode stays readable.
+- `firefox/listing.md` is a ready-to-paste draft of the addons.mozilla.org listing (not part of the package). Keep it in step with the website text.
+
 - Tabs that were open before the extension was installed or updated may have no content script. The settings page button "Refresh labels on all tabs" sends `reset` to each tab (remove everything the extension put there, then re-apply) and injects the script, with the `scripting` permission, where there is none. A content script must answer `refresh` and `reset`, otherwise the button cannot tell a tab that has it from one that does not.
 - Never keep page state only in the content script's memory: after an update the old script is dead but its changes stay. The applied title prefix and the hidden icon links are recorded in the page (`data-tab-labels-*` attributes). Titles are always normalised with `TabLabels.normaliseTitle` (one prefix, at the front, whatever else is in the title).
 - Updates: Firefox kills the old content script, Chrome leaves it running in open tabs (cut off, but its observer still runs) and also clears `storage.session`. See the "Doubled labels" section of the spec. To test an update, install an older release from git (`git archive firefox-vX.Y.Z firefox`) and then the new code over it in a throwaway profile.

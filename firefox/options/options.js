@@ -6,10 +6,31 @@ const statusEl = document.getElementById("status");
 const containersEl = document.getElementById("containers");
 const containersNote = document.getElementById("containers-note");
 const importFileEl = document.getElementById("import-file");
+const spaceToggle = document.getElementById("space-toggle");
 
 const TOGGLES = { showFavicon: "favicon", showTitle: "title", showEmoji: "emoji" };
 const IMPORT_MAX_BYTES = 256 * 1024;
 const STATUS_MS = 4000;
+const SPACE_CACHE_KEY = "tab-labels-space";
+// Switches the user has already flipped. The page's first read of storage can arrive late; it must not undo a click.
+const flipped = new Set();
+
+// Show the space theme straight away from a remembered value, before storage has answered,
+// so the page does not flash its plain look first. Storage stays the source of truth.
+try {
+  if (localStorage.getItem(SPACE_CACHE_KEY) === "1") document.documentElement.setAttribute("data-space", "");
+} catch (e) {
+  // no local storage in this context: the page simply starts plain
+}
+
+function applySpace(on) {
+  document.documentElement.toggleAttribute("data-space", on);
+  try {
+    localStorage.setItem(SPACE_CACHE_KEY, on ? "1" : "0");
+  } catch (e) {
+    // see above
+  }
+}
 
 let rows = []; // { id: string | null, name, emoji, colour }
 let statusTimer = null;
@@ -259,7 +280,11 @@ async function load() {
   const settings = await readSettings();
   rows = settings.labels.map((l) => Object.assign({}, l));
   for (const input of document.querySelectorAll("input[data-key]")) {
-    input.checked = settings.display[TOGGLES[input.dataset.key]];
+    if (!flipped.has(input.dataset.key)) input.checked = settings.display[TOGGLES[input.dataset.key]];
+  }
+  if (!flipped.has("spaceTheme")) {
+    spaceToggle.checked = settings.spaceTheme;
+    applySpace(settings.spaceTheme);
   }
   render();
   await renderContainers(settings);
@@ -301,9 +326,18 @@ document.getElementById("reset").addEventListener("click", async () => {
 
 for (const input of document.querySelectorAll("input[data-key]")) {
   input.addEventListener("change", async () => {
+    flipped.add(input.dataset.key);
     await browser.storage.local.set({ [input.dataset.key]: input.checked });
     setStatus("Saved.", false);
   });
 }
 
 load();
+
+spaceToggle.addEventListener("change", async () => {
+  flipped.add("spaceTheme");
+  const on = spaceToggle.checked; // the value at the moment of the click, not whatever it is after the save
+  applySpace(on);
+  await browser.storage.local.set({ spaceTheme: on });
+  setStatus(on ? "Welcome to space." : "Back on Earth.", false);
+});

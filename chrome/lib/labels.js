@@ -10,7 +10,7 @@
   const NOT_EMOJI_RE = /[\p{L}\p{N}\s]/u;
 
   // Every key the extension keeps in storage.local.
-  const SETTINGS_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji"];
+  const SETTINGS_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji", "spaceTheme"];
 
   const DEFAULT_LABELS = [
     { id: "waiting", name: "Waiting", emoji: "⏳", colour: "#d98e04" },
@@ -22,6 +22,7 @@
     return {
       labels: DEFAULT_LABELS.map((l) => Object.assign({}, l)),
       display: { favicon: true, title: true, emoji: true },
+      spaceTheme: false,
     };
   }
 
@@ -69,6 +70,7 @@
     if (!raw || typeof raw !== "object") return out;
     if (Array.isArray(raw.labels)) out.labels = normaliseLabels(raw.labels);
     out.display = normaliseDisplay(raw);
+    out.spaceTheme = raw.spaceTheme === true;
     return out;
   }
 

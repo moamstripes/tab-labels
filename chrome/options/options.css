@@ -42,7 +42,7 @@ body {
 }
 
 main {
-  max-width: 680px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 32px 16px 96px;
 }
@@ -271,13 +271,6 @@ main {
   border-top: 1px solid var(--border);
 }
 
-.tools {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
 /* Status toast */
 
 #status {
@@ -414,4 +407,131 @@ main {
 
 .refresh-row .hint {
   margin-bottom: 10px;
+}
+
+/* Layout: switches in a sidebar, labels (and containers) in the main column */
+
+.layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+/* The sidebar follows you down the page, but only in windows tall enough to show all of it:
+   a sticky element taller than the window would hide its lower part. */
+@media (min-height: 760px) and (min-width: 821px) {
+  .sidebar {
+    position: sticky;
+    top: 16px;
+  }
+}
+
+.sidebar .card {
+  margin-bottom: 0;
+}
+
+.content .card:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 820px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+}
+
+/* Labels card header with small icon buttons at the top right */
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.card-head h2 {
+  margin: 0;
+}
+
+.card-tools {
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-color: transparent;
+  background: none;
+  color: var(--muted);
+}
+
+.icon-btn:hover {
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* A second card in the sidebar, and the "Take me to space" theme */
+
+.sidebar .card + .card {
+  margin-top: 18px;
+}
+
+.space-card {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.space-card .toggle {
+  margin: 0;
+  padding: 0;
+  border-top: none;
+}
+
+:root[data-space] {
+  color-scheme: light;
+  --bg: #cdbdf0;
+  --card: rgba(255, 255, 255, 0.9);
+  --text: #2b2347;
+  --muted: #5d567f;
+  --border: rgba(110, 90, 170, 0.3);
+  --field: #ffffff;
+  --accent: #6f56cf;
+  --accent-text: #ffffff;
+  --on: #7b5fd6;
+  --off: #b3a8d6;
+  --danger: #b3392c;
+  --shadow: 0 2px 12px rgba(70, 50, 130, 0.2);
+}
+
+:root[data-space] body {
+  background: #cdbdf0 url("space.svg") center / cover no-repeat fixed;
+}
+
+:root[data-space] .card {
+  backdrop-filter: blur(3px);
+}
+
+:root[data-space] #emoji-picker {
+  background: #ffffff;
 }
