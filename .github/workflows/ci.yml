@@ -1,0 +1,32 @@
+name: CI
+
+# Runs the unit tests and builds the package for both browsers on every push to main
+# and on every pull request. The tests use the JavaScript engine that ships with macOS,
+# which is why this runs on a macOS runner.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, chrome]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run the unit tests
+        working-directory: ${{ matrix.browser }}
+        run: osascript -l JavaScript test/run.js
+
+      - name: Build the package
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: bash scripts/build.sh "$BROWSER"

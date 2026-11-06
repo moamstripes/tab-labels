@@ -1,0 +1,83 @@
+name: Release
+
+# Pushing a tag publishes a GitHub release for one browser:
+#   firefox-v1.2.0   releases the Firefox extension
+#   chrome-v1.2.0    releases the Chrome extension
+# The number in the tag must match "version" in that browser's manifest.json.
+#
+# Firefox is also signed as a private (unlisted) add-on when the repository has the
+# secrets AMO_JWT_ISSUER and AMO_JWT_SECRET. Without them the release still contains
+# the zip, just not the signed .xpi.
+
+on:
+  push:
+    tags:
+      - "firefox-v*"
+      - "chrome-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    env:
+      AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+      AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the browser and version from the tag
+        id: tag
+        run: |
+          echo "browser=${GITHUB_REF_NAME%%-v*}" >> "$GITHUB_OUTPUT"
+          echo "version=${GITHUB_REF_NAME#*-v}" >> "$GITHUB_OUTPUT"
+
+      - name: Check the manifest version matches the tag
+        env:
+          BROWSER: ${{ steps.tag.outputs.browser }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          actual="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['version'])" "$BROWSER/manifest.json")"
+          if [ "$actual" != "$VERSION" ]; then
+            echo "::error::The tag says $VERSION but $BROWSER/manifest.json says $actual. Run scripts/bump-version.sh, commit, and tag again."
+            exit 1
+          fi
+
+      - name: Run the unit tests
+        working-directory: ${{ steps.tag.outputs.browser }}
+        run: osascript -l JavaScript test/run.js
+
+      - name: Build the package
+        id: build
+        env:
+          BROWSER: ${{ steps.tag.outputs.browser }}
+        run: echo "zip=$(bash scripts/build.sh "$BROWSER")" >> "$GITHUB_OUTPUT"
+
+      - name: Sign the Firefox add-on (private, not published on addons.mozilla.org)
+        if: steps.tag.outputs.browser == 'firefox' && env.AMO_JWT_ISSUER != ''
+        run: >
+          npx --yes web-ext@8 sign
+          --source-dir dist/firefox
+          --artifacts-dir dist/signed
+          --channel unlisted
+          --api-key "$AMO_JWT_ISSUER"
+          --api-secret "$AMO_JWT_SECRET"
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BROWSER: ${{ steps.tag.outputs.browser }}
+          VERSION: ${{ steps.tag.outputs.version }}
+          ZIP: ${{ steps.build.outputs.zip }}
+        run: |
+          shopt -s nullglob
+          files=("$ZIP" dist/signed/*.xpi)
+          case "$BROWSER" in
+            firefox) name="Firefox" ;;
+            chrome) name="Chrome" ;;
+          esac
+          gh release create "$GITHUB_REF_NAME" "${files[@]}" \
+            --verify-tag \
+            --title "Tab Labels for $name $VERSION" \
+            --generate-notes

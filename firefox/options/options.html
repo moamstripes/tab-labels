@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tab Labels settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <header class="page-header">
+        <img src="../icons/icon.svg" alt="" width="44" height="44" />
+        <div>
+          <h1>Tab Labels</h1>
+          <p>Tag tabs with coloured labels. Everything stays in your browser.</p>
+        </div>
+      </header>
+
+      <section class="card">
+        <h2>Show labels</h2>
+        <p class="hint">Choose what appears on a labelled tab. Changes apply straight away.</p>
+        <label class="toggle">
+          <input type="checkbox" class="switch" data-key="showFavicon" />
+          <span class="toggle-text">
+            <strong>Favicon bubble</strong>
+            <small>A coloured dot in the top-left corner of the tab icon.</small>
+          </span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" class="switch" data-key="showTitle" />
+          <span class="toggle-text">
+            <strong>Title label</strong>
+            <small>The label name in front of the page title.</small>
+          </span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" class="switch" data-key="showEmoji" />
+          <span class="toggle-text">
+            <strong>Emoji</strong>
+            <small>The label emoji in front of the page title. Works on its own or with the title label.</small>
+          </span>
+        </label>
+      </section>
+
+      <section class="card">
+        <h2>Containers</h2>
+        <p class="hint">
+          New tabs opened in a container get the label chosen here. A tab you label or unlabel yourself is left
+          alone. When you pick a label, open tabs in that container that have no label get it too.
+        </p>
+        <ul id="containers" class="list"></ul>
+        <p id="containers-note" class="hint"></p>
+      </section>
+
+      <section class="card">
+        <h2>Labels</h2>
+        <p class="hint">Each label has an emoji, a colour and an optional name. Changes apply after you save.</p>
+        <ul id="rows" class="list"></ul>
+        <p id="rows-empty" class="hint" hidden>No labels yet. Add one, or import a file.</p>
+        <div class="actions">
+          <button id="add" type="button" class="btn">Add label</button>
+          <button id="save" type="button" class="btn primary">Save labels</button>
+        </div>
+        <div class="tools">
+          <button id="import" type="button" class="btn ghost">Import from file</button>
+          <button id="export" type="button" class="btn ghost">Export to file</button>
+          <button id="reset" type="button" class="btn ghost">Reset to defaults</button>
+          <input id="import-file" type="file" accept=".json,application/json" hidden />
+        </div>
+      </section>
+    </main>
+    <div id="status" role="status" aria-live="polite"></div>
+    <script src="../lib/labels.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>
