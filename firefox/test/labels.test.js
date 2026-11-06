@@ -296,3 +296,28 @@ test("enterAction copes with an empty list or a bad index", () => {
   assertEqual(TabLabels.enterAction([], 0), "stay");
   assertEqual(TabLabels.enterAction([{ emoji: "👀", name: "A" }], 5), "stay");
 });
+
+test("refreshSummary counts refreshed and injected tabs together", () => {
+  assertEqual(TabLabels.refreshSummary({ refreshed: 3, injected: 1, skipped: 0 }), "Refreshed 4 tabs.");
+  assertEqual(TabLabels.refreshSummary({ refreshed: 1, injected: 0, skipped: 0 }), "Refreshed 1 tab.");
+});
+
+test("refreshSummary mentions tabs that could not be reached", () => {
+  assertEqual(
+    TabLabels.refreshSummary({ refreshed: 2, injected: 0, skipped: 2 }),
+    "Refreshed 2 tabs. 2 could not be reached (browser pages, or tabs that have not loaded yet)."
+  );
+  assertEqual(
+    TabLabels.refreshSummary({ refreshed: 1, injected: 0, skipped: 1 }),
+    "Refreshed 1 tab. 1 could not be reached (browser pages, or tabs that have not loaded yet)."
+  );
+});
+
+test("refreshSummary copes with no tabs, or none reachable", () => {
+  assertEqual(TabLabels.refreshSummary({ refreshed: 0, injected: 0, skipped: 0 }), "There are no open tabs to refresh.");
+  assertEqual(
+    TabLabels.refreshSummary({ refreshed: 0, injected: 0, skipped: 3 }),
+    "No tabs could be refreshed. 3 could not be reached (browser pages, or tabs that have not loaded yet)."
+  );
+  assertEqual(TabLabels.refreshSummary(null), "There are no open tabs to refresh.");
+});

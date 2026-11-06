@@ -8,6 +8,8 @@ importScripts("lib/labels.js");
 const PARENT_ID = "tab-labels-parent";
 const SEPARATOR_ID = "tab-labels-separator";
 const REMOVE_ID = "tab-labels-remove";
+const SETTINGS_SEPARATOR_ID = "tab-labels-settings-separator";
+const SETTINGS_ID = "tab-labels-settings";
 const ITEM_PREFIX = "tab-labels-item:";
 const TAB_KEY_PREFIX = "tab:";
 const MAX_ICON_BYTES = 1024 * 1024;
@@ -80,6 +82,8 @@ async function buildMenu() {
   }
   if (labels.length) chrome.contextMenus.create({ id: SEPARATOR_ID, parentId: PARENT_ID, type: "separator", contexts });
   chrome.contextMenus.create({ id: REMOVE_ID, parentId: PARENT_ID, title: "Remove label", contexts });
+  chrome.contextMenus.create({ id: SETTINGS_SEPARATOR_ID, parentId: PARENT_ID, type: "separator", contexts });
+  chrome.contextMenus.create({ id: SETTINGS_ID, parentId: PARENT_ID, title: "Tab Labels settings", contexts });
 }
 
 function notifyTab(tabId) {
@@ -92,9 +96,14 @@ async function refreshAllTabs() {
   for (const tab of await chrome.tabs.query({})) notifyTab(tab.id);
 }
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (!tab || tab.id === undefined || typeof info.menuItemId !== "string") return;
+async function handleMenuClick(info, tab) {
+  if (typeof info.menuItemId !== "string") return;
   const id = info.menuItemId;
+  if (id === SETTINGS_ID) {
+    await chrome.runtime.openOptionsPage();
+    return;
+  }
+  if (!tab || tab.id === undefined) return;
   try {
     if (id === REMOVE_ID) await setTabLabelId(tab.id, null);
     else if (id.startsWith(ITEM_PREFIX)) await setTabLabelId(tab.id, id.slice(ITEM_PREFIX.length));
@@ -103,7 +112,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   } catch (e) {
     logError(e);
   }
-});
+}
+
+chrome.contextMenus.onClicked.addListener(handleMenuClick);
 
 // Clicking the toolbar icon opens the settings.
 chrome.action.onClicked.addListener(() => chrome.runtime.openOptionsPage());
@@ -112,6 +123,26 @@ chrome.runtime.onInstalled.addListener(rebuildMenu);
 chrome.runtime.onStartup.addListener(rebuildMenu);
 
 const DISPLAY_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji"];
+
+// For the settings page button: refresh every tab, and add the label code to tabs that
+// were open before the extension was installed or updated (they have none yet).
+async function refreshEverywhere() {
+  const result = { refreshed: 0, injected: 0, skipped: 0 };
+  for (const tab of await chrome.tabs.query({})) {
+    try {
+      await chrome.tabs.sendMessage(tab.id, { type: "refresh" });
+      result.refreshed++;
+    } catch (e) {
+      try {
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["lib/labels.js", "content.js"] });
+        result.injected++;
+      } catch (e2) {
+        result.skipped++; // browser pages, or a tab that has not loaded
+      }
+    }
+  }
+  return result;
+}
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "local") return;
@@ -192,6 +223,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   let reply = null;
   if (message && message.type === "getState") reply = getState(sender);
   else if (message && message.type === "renderIcon") reply = renderIcon(message.url, message.colour);
+  else if (message && message.type === "refreshAllTabs") reply = refreshEverywhere();
   if (!reply) return false;
   reply.then(sendResponse, (e) => {
     logError(e);

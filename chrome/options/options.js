@@ -186,6 +186,19 @@ async function load() {
 
 document.getElementById("add").addEventListener("click", addRow);
 
+const refreshButton = document.getElementById("refresh-tabs");
+refreshButton.addEventListener("click", async () => {
+  refreshButton.disabled = true;
+  try {
+    const result = await chrome.runtime.sendMessage({ type: "refreshAllTabs" });
+    setStatus(TabLabels.refreshSummary(result), false);
+  } catch (e) {
+    setStatus("Could not refresh the tabs. Try again.", true);
+  } finally {
+    refreshButton.disabled = false;
+  }
+});
+
 document.getElementById("save").addEventListener("click", save);
 
 document.getElementById("export").addEventListener("click", exportFile);

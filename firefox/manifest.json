@@ -19,7 +19,7 @@
     "48": "icons/icon.svg",
     "96": "icons/icon.svg"
   },
-  "permissions": ["menus", "tabs", "storage", "sessions", "contextualIdentities", "cookies"],
+  "permissions": ["menus", "tabs", "storage", "sessions", "contextualIdentities", "cookies", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "scripts": ["lib/labels.js", "background.js"]

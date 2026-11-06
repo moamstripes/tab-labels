@@ -126,8 +126,11 @@
     applyFavicon();
   }
 
-  chrome.runtime.onMessage.addListener((message) => {
-    if (message && message.type === "refresh") refresh();
+  // Replying lets the background tell a tab that has this script from one that does not.
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (!message || message.type !== "refresh") return false;
+    refresh().then(() => sendResponse({ ok: true }));
+    return true;
   });
 
   refresh();

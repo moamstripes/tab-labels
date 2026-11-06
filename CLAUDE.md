@@ -57,6 +57,8 @@ The current version is in each `manifest.json`; published versions are on the re
 
 ## Gotchas
 
+- Tabs that were open before the extension was installed or updated have no content script until reloaded. The settings page button "Refresh labels on all tabs" injects it with the `scripting` permission. A content script must answer the `refresh` message, otherwise that button cannot tell a tab that has it from one that does not.
+
 - Firefox MV3 host permissions can be revoked by the user; labels then cannot show.
 - Labels cannot be shown on `about:`/`chrome://` pages, the PDF viewer or the add-on stores. The label is still stored.
 - A label's name is optional but its emoji is required (`validateLabel`). The title prefix is `emoji name · title`; with the name off it is `emoji · title`.

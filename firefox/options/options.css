@@ -412,3 +412,14 @@ main {
   color: var(--muted);
   font-size: 0.82rem;
 }
+
+/* Refresh all tabs */
+
+.refresh-row {
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.refresh-row .hint {
+  margin-bottom: 10px;
+}

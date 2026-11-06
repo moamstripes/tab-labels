@@ -2,7 +2,7 @@ const manifest = JSON.parse(readFile("manifest.json"));
 
 test("manifest is Manifest V3 with the required permissions", () => {
   assertEqual(manifest.manifest_version, 3);
-  for (const p of ["menus", "tabs", "storage", "sessions", "contextualIdentities", "cookies"]) {
+  for (const p of ["menus", "tabs", "storage", "sessions", "contextualIdentities", "cookies", "scripting"]) {
     assertTrue(manifest.permissions.includes(p), "missing permission " + p);
   }
   assertTrue(manifest.host_permissions.includes("<all_urls>"), "missing host permission");

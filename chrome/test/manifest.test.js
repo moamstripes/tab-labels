@@ -3,7 +3,7 @@ const manifest = JSON.parse(readFile("manifest.json"));
 test("manifest is Manifest V3 with a service worker and the required permissions", () => {
   assertEqual(manifest.manifest_version, 3);
   assertEqual(manifest.background.service_worker, "background.js");
-  for (const p of ["contextMenus", "storage"]) {
+  for (const p of ["contextMenus", "storage", "scripting"]) {
     assertTrue(manifest.permissions.includes(p), "missing permission " + p);
   }
   assertTrue(manifest.host_permissions.includes("<all_urls>"), "missing host permission");

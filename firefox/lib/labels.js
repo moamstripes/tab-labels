@@ -158,6 +158,21 @@
     return String(row.emoji || "").trim() || String(row.name || "").trim() ? "add" : "stay";
   }
 
+  // The message shown after "Refresh all tabs": how many tabs were refreshed (including
+  // ones the label code had to be added to) and how many could not be reached.
+  function refreshSummary(result) {
+    const r = result || {};
+    const done = (r.refreshed || 0) + (r.injected || 0);
+    const skipped = r.skipped || 0;
+    const tabs = (n) => n + (n === 1 ? " tab" : " tabs");
+    const unreachable = skipped
+      ? skipped + " could not be reached (browser pages, or tabs that have not loaded yet)."
+      : "";
+    if (done === 0 && skipped === 0) return "There are no open tabs to refresh.";
+    if (done === 0) return "No tabs could be refreshed. " + unreachable;
+    return "Refreshed " + tabs(done) + "." + (unreachable ? " " + unreachable : "");
+  }
+
   function menuTitle(label) {
     return label.emoji + (label.name ? " " + label.name : "");
   }
@@ -237,6 +252,7 @@
     isPrefixed,
     stripPrefix,
     enterAction,
+    refreshSummary,
     menuTitle,
     exportLabels,
     parseLabelsImport,
