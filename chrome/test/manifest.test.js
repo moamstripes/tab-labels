@@ -33,3 +33,15 @@ test("shared logic is loaded before the scripts that use it", () => {
   assertEqual(manifest.content_scripts[0].js[0], "lib/labels.js");
   assertTrue(readFile("background.js").includes('importScripts("lib/labels.js")'), "service worker must import lib/labels.js");
 });
+
+test("settings page loads the emoji picker scripts in order, and they exist", () => {
+  const html = readFile("options/options.html");
+  const scripts = ["../lib/labels.js", "../lib/emoji.js", "emoji-picker.js", "options.js"];
+  let last = -1;
+  for (const s of scripts) {
+    const at = html.indexOf('src="' + s + '"');
+    assertTrue(at > last, s + " is missing or out of order in options.html");
+    last = at;
+  }
+  assertTrue(fileExists("lib/emoji.js") && fileExists("options/emoji-picker.js"), "picker files missing");
+});

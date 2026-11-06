@@ -92,3 +92,8 @@ The content script finds the page's icon URL (`link rel~=icon`, falling back to 
 - **Removal is remembered.** "Remove label" stores an empty string for the tab instead of deleting the value, so container rules and session restore do not label it again. Deleting a label drops any container rule that used it.
 - **Settings page redesign.** Card layout, light and dark theme, up and down arrows removed.
 - **Import and export.** Export writes `tab-labels.json` with emoji, name and colour of the saved labels only. Import accepts that file (or a bare array), validates each label, adds new ones as unsaved rows, skips duplicates and invalid entries, reads at most 100 labels from a file of at most 256 KB.
+
+## Emoji picker and Enter key (added later; same in both browsers)
+
+- **Emoji picker.** Clicking a label's emoji box on the settings page opens a picker under it (`options/emoji-picker.js`, data and search in `lib/emoji.js`): 222 emoji in sections, a search box, and a hint for the computer's own emoji menu. A web page cannot open the system menu, so this is the nearest equivalent. An emoji inserted into the picker's search box by the system menu is picked at once, so that menu works too. Escape closes it and returns to the emoji box; Enter in the search box picks the first match when something has been typed. Every emoji in the list must pass `validateLabel` (a unit test enforces this).
+- **Enter in the label list.** Enter in a name box moves to the next label's name, or after the last label adds a new one with the picker open (`enterAction` in `lib/labels.js`). A blank last label does not add another. Enter in the emoji box jumps to the same label's name. Enter that confirms an input method composition is ignored.

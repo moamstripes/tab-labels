@@ -36,6 +36,7 @@ globalThis.assertEqual = function (actual, expected, message) {
 };
 
 (0, eval)(readFile("lib/labels.js"));
+(0, eval)(readFile("lib/emoji.js"));
 
 const files = ObjC.deepUnwrap(fm.contentsOfDirectoryAtPathError($("test"), $()))
   .filter((f) => f.endsWith(".test.js"))

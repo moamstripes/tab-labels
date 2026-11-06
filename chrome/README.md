@@ -25,6 +25,8 @@ Chrome keeps an unpacked extension across restarts as long as this folder stays 
 - Right-click a page, then **Label tab**, then a label. **Remove label** clears it. The same menu is on the right-click menu of the toolbar icon.
 - Click the toolbar icon to open the settings.
 - In the settings you can add, edit and delete labels, switch the three display options (favicon bubble, title label, emoji), and use **Import from file** / **Export to file** for labels.
+- Click a label's emoji box on the settings page to open an emoji picker. Search by word, click one, and it is filled in. Browsers do not let a page open the computer's own emoji menu, so the picker has its own list; the system menu (on a Mac, Control + Command + Space) works inside the picker's search box, and anything pasted into the emoji box works too. Enter in the search box picks the first match.
+- In the label list, Enter in a name box moves to the next label, and after the last label it adds a new one with the picker open. Enter in the emoji box jumps to the same label's name. A blank last label is not duplicated.
 - Export saves your labels (emoji, name, colour) to `tab-labels.json`. Import adds the labels in a file to your list without replacing anything, skips ones you already have, and lets you check them before you press **Save labels**.
 - A label's name is optional; without one the title reads like `⏳ · Inbox`.
 - Labels cannot be shown on `chrome://` pages, the Chrome Web Store or the built-in PDF viewer, because Chrome blocks extensions there. The label is still saved.
@@ -44,5 +46,7 @@ This uses the JavaScript engine built into macOS, so Node is not needed. It cove
 - [ ] A page that changes its own title keeps the prefix.
 - [ ] A label with an empty name works in the menu, title and settings page.
 - [ ] Add, edit, delete and reset labels on the settings page; the right-click menu updates.
+- [ ] Click a label's emoji box: the picker opens under it. Search for a word, click an emoji, and it fills the box.
+- [ ] Enter in a name box moves to the next label; Enter in the last label adds a new one; Enter in a blank last label does nothing.
 - [ ] Export, then import the file after resetting to defaults: only new labels are added, and nothing is kept until you press Save labels.
 - [ ] On a `chrome://` page nothing breaks.

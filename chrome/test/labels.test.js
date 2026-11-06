@@ -215,3 +215,25 @@ test("mergeImported adds new labels and skips ones already present", () => {
   assertEqual(r.added, [{ name: "Later", emoji: "🕐", colour: "#112233" }]);
   assertEqual(r.duplicates, 2);
 });
+
+test("Enter in a label that has a label after it moves to the next one", () => {
+  const rows = [{ emoji: "👀", name: "A" }, { emoji: "🎯", name: "B" }, { emoji: "", name: "" }];
+  assertEqual(TabLabels.enterAction(rows, 0), "next");
+  assertEqual(TabLabels.enterAction(rows, 1), "next");
+});
+
+test("Enter in the last label adds a new one when it has an emoji or a name", () => {
+  assertEqual(TabLabels.enterAction([{ emoji: "👀", name: "" }], 0), "add");
+  assertEqual(TabLabels.enterAction([{ emoji: "", name: "Later" }], 0), "add");
+  assertEqual(TabLabels.enterAction([{ emoji: " ", name: " later " }], 0), "add");
+});
+
+test("Enter in a blank last label does nothing, so blank labels do not pile up", () => {
+  assertEqual(TabLabels.enterAction([{ emoji: "", name: "" }], 0), "stay");
+  assertEqual(TabLabels.enterAction([{ emoji: " ", name: "  " }], 0), "stay");
+});
+
+test("enterAction copes with an empty list or a bad index", () => {
+  assertEqual(TabLabels.enterAction([], 0), "stay");
+  assertEqual(TabLabels.enterAction([{ emoji: "👀", name: "A" }], 5), "stay");
+});

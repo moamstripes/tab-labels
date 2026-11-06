@@ -11,6 +11,8 @@ There are two extensions here, one per browser. They share the same name, settin
 
 Each folder has its own README with install steps, usage and a manual test checklist.
 
+The Firefox add-on is registered on addons.mozilla.org as a private (unlisted) add-on. Its developer page, where versions are uploaded and signed, is <https://addons.mozilla.org/en-US/developers/addon/fdb422307dd04e4c91e8/> (needs the Mozilla account that owns it).
+
 ## Installing a release
 
 Releases are on the repository's **Releases** page. Tags are per browser, so each release is for one browser.
@@ -56,7 +58,9 @@ Both workflows run on macOS runners because the tests use the macOS JavaScript e
 
 ### Signing the Firefox release (optional, one-time setup)
 
-Firefox only keeps add-ons that Mozilla has signed. To have the release workflow sign it as a private (unlisted) add-on and attach the `.xpi`:
+Firefox only keeps add-ons that Mozilla has signed. The add-on's developer page is <https://addons.mozilla.org/en-US/developers/addon/fdb422307dd04e4c91e8/>.
+
+To have the release workflow sign it as a private (unlisted) add-on and attach the `.xpi`:
 
 1. Create API credentials at <https://addons.mozilla.org/developers/addon/api/key/>.
 2. In the GitHub repository, go to Settings, Secrets and variables, Actions, and add two repository secrets: `AMO_JWT_ISSUER` (the JWT issuer) and `AMO_JWT_SECRET` (the JWT secret).

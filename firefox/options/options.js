@@ -54,14 +54,30 @@ function makeDeleteButton(onClick) {
 }
 
 function render() {
+  EmojiPicker.close();
   rowsEl.textContent = "";
   rowsEmptyEl.hidden = rows.length > 0;
   rows.forEach((row, i) => {
     const li = document.createElement("li");
+    const emojiInput = makeInput("text", "emoji", row.emoji, "Emoji", (v) => (row.emoji = v), "🙂");
+    EmojiPicker.attach(emojiInput, (emoji) => {
+      row.emoji = emoji;
+      emojiInput.value = emoji;
+    });
+    const nameInput = makeInput("text", "name", row.name, "Name (optional)", (v) => (row.name = v), "Name (optional)");
+    onEnter(emojiInput, () => {
+      EmojiPicker.close();
+      nameInput.focus();
+    });
+    onEnter(nameInput, () => {
+      const action = TabLabels.enterAction(rows, i);
+      if (action === "next") rowsEl.children[i + 1].querySelector(".name").focus();
+      else if (action === "add") addRow();
+    });
     li.append(
       makeInput("color", "swatch", row.colour, "Colour", (v) => (row.colour = v)),
-      makeInput("text", "emoji", row.emoji, "Emoji", (v) => (row.emoji = v), "🙂"),
-      makeInput("text", "name", row.name, "Name (optional)", (v) => (row.name = v), "Name (optional)"),
+      emojiInput,
+      nameInput,
       makeDeleteButton(() => remove(i))
     );
     rowsEl.appendChild(li);
@@ -71,6 +87,23 @@ function render() {
 function remove(i) {
   rows.splice(i, 1);
   render();
+}
+
+function addRow() {
+  rows.push({ id: null, name: "", emoji: "", colour: "#6a5acd" });
+  render();
+  setStatus("", false);
+  rowsEl.lastElementChild.querySelector(".emoji").focus(); // opens the emoji picker
+}
+
+// Enter in a label's name box: on to the next label, or a new one after the last.
+function onEnter(input, action) {
+  input.addEventListener("keydown", (event) => {
+    // Enter that confirms an input method composition must not jump to another field.
+    if (event.key !== "Enter" || event.isComposing || event.keyCode === 229) return;
+    event.preventDefault();
+    action();
+  });
 }
 
 async function save() {
@@ -232,11 +265,7 @@ async function load() {
   await renderContainers(settings);
 }
 
-document.getElementById("add").addEventListener("click", () => {
-  rows.push({ id: null, name: "", emoji: "", colour: "#6a5acd" });
-  render();
-  setStatus("", false);
-});
+document.getElementById("add").addEventListener("click", addRow);
 
 document.getElementById("save").addEventListener("click", save);
 

@@ -111,6 +111,16 @@
     return isPrefixed(title, prefix) ? String(title).slice(prefix.length) : title;
   }
 
+  // What Enter in label number `index` of the settings list should do: move to the
+  // next label ("next"), add a new one ("add"), or nothing ("stay"). A blank last label
+  // does not add another, so blank labels cannot pile up.
+  function enterAction(rows, index) {
+    if (index < rows.length - 1) return "next";
+    const row = rows[index];
+    if (!row) return "stay";
+    return String(row.emoji || "").trim() || String(row.name || "").trim() ? "add" : "stay";
+  }
+
   function menuTitle(label) {
     return label.emoji + (label.name ? " " + label.name : "");
   }
@@ -187,6 +197,7 @@
     buildTitle,
     isPrefixed,
     stripPrefix,
+    enterAction,
     menuTitle,
     exportLabels,
     parseLabelsImport,

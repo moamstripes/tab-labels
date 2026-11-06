@@ -104,3 +104,8 @@ This folder is the Chrome port of the Firefox extension, with the same name, set
 - **Permissions:** `contextMenus`, `storage`, and host permission `<all_urls>`. Minimum Chrome 110.
 - **Icons:** Chrome needs PNG icons, generated from the same shapes as `icons/icon.svg` (16, 32, 48 and 128 pixels). The SVG is still used in the settings page.
 - **Known gaps:** the SVG favicon case falls back to a grey disc; a page whose security policy blocks the replacement icon keeps its own icon; labels are lost when Chrome quits.
+
+## Emoji picker and Enter key (added later; same in both browsers)
+
+- **Emoji picker.** Clicking a label's emoji box on the settings page opens a picker under it (`options/emoji-picker.js`, data and search in `lib/emoji.js`): 222 emoji in sections, a search box, and a hint for the computer's own emoji menu. A web page cannot open the system menu, so this is the nearest equivalent. An emoji inserted into the picker's search box by the system menu is picked at once, so that menu works too. Escape closes it and returns to the emoji box; Enter in the search box picks the first match when something has been typed. Every emoji in the list must pass `validateLabel` (a unit test enforces this).
+- **Enter in the label list.** Enter in a name box moves to the next label's name, or after the last label adds a new one with the picker open (`enterAction` in `lib/labels.js`). A blank last label does not add another. Enter in the emoji box jumps to the same label's name. Enter that confirms an input method composition is ignored.
