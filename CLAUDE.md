@@ -1,0 +1,64 @@
+# Tab Labels: working notes
+
+A browser extension that tags tabs with coloured labels (emoji, optional name, colour), shown as a dot on the tab icon and/or an emoji and name in front of the tab title. It exists twice, once per browser, in one repository. Private GitHub repo `moamstripes/tab-labels`. Overview and release steps are in `README.md`; each browser folder has its own README with install steps and a manual test checklist.
+
+## Rules for every change
+
+- **Always change both `firefox/` and `chrome/`** when asked for an update. Say plainly if something cannot exist in Chrome.
+- Nothing is committed or pushed unless asked, with one standing exception: when a version is updated, follow the `release-tab-labels` skill (`.claude/skills/release-tab-labels/SKILL.md`). It pushes to GitHub and creates a release with a zip for each browser.
+- Commits use the repo-local git identity: name `moamstripes` and the GitHub noreply email. Never use the global git identity or the work email, and keep the user's full name out of files and commit messages.
+- British English in all user-facing text and docs. No em dashes. Do not invent facts; if something is untested, say so.
+- Everything stays local to the browser. No network use except fetching the page's own icon.
+
+## Layout
+
+```
+firefox/   Manifest V3, event page (background.scripts), tab right-click menu, containers
+chrome/    Manifest V3, service worker, page and toolbar-icon menus, no containers
+scripts/   build.sh (zip a browser's runtime files), bump-version.sh
+.github/workflows/   ci.yml (tests on push and PRs), release.yml (tag -> GitHub release)
+```
+
+Inside each browser folder: `manifest.json`, `background.js`, `content.js` (title prefix and favicon dot in the page), `lib/` (`labels.js` pure logic, `emoji.js` picker data and search), `options/` (settings page, `emoji-picker.js`), `icons/`, `test/`, `docs/superpowers/` (spec and plan).
+
+## Where the two versions differ on purpose
+
+- Chrome has no tab context menu (menu is on the page and toolbar icon), no containers, and no per-tab storage that survives quitting the browser (labels live in `storage.session`).
+- Firefox keeps per-tab labels with `sessions.setTabValue`, supports container rules, and never shows the favicon dot in a container tab.
+- Chrome needs PNG icons (generated from the SVG shapes), a service worker (no DOM, so icons are drawn with `OffscreenCanvas`), and replies to messages with `sendResponse` plus `return true`.
+- `lib/labels.js` is a separate copy per browser. The Chrome copy has the container logic removed. Shared behaviour changes must be made in both.
+- `options/emoji-picker.js` and `lib/emoji.js` are identical in both folders. Edit one, then copy it to the other (`cmp` to check).
+- `options/options.js` is the same apart from `browser.` versus `chrome.` and the Firefox-only containers section.
+
+## Commands
+
+```
+cd firefox && osascript -l JavaScript test/run.js    # unit tests (also in chrome/)
+bash scripts/build.sh firefox                        # or chrome; writes dist/*.zip
+bash scripts/bump-version.sh firefox 1.2.0           # edits manifest.json only
+```
+
+Node is not installed. The unit tests run on the JavaScript engine built into macOS (`osascript -l JavaScript`); `test/run.js` is a small harness, tests are `test/*.test.js`. Write the failing test first. Add a test for anything pure that goes into `lib/`.
+
+## Testing in a real browser
+
+Unit tests cannot cover the browser APIs. Use throwaway profiles and delete them afterwards:
+
+- **Firefox:** start headless with a temporary profile, `--marionette`, and `MOZ_REMOTE_ALLOW_SYSTEM_ACCESS=1`. Install with the `Addon:Install` Marionette command (`temporary: true`). The settings page (`moz-extension://<uuid>/options/options.html`) runs with extension privileges, so a script run there can call `browser.*` to create containers, set storage and read `tabs.get(...).title` and `favIconUrl`.
+- **Chrome:** start headless with `--remote-debugging-port` and `--enable-unsafe-extension-debugging`, then call `Extensions.loadUnpacked` over the debugging websocket (branded Chrome ignores `--load-extension`). Pick the extension's own service worker by its extension id; Chrome ships built-in extensions that also have a `background.js`. Python has no websocket library here, so the test scripts carry a small client.
+- Firefox returns every tab icon as a `data:` URL, so to check the dot, compare against an unlabelled tab showing the same page.
+- The right-click menu items cannot be clicked headlessly. Say so rather than claiming they were tested.
+
+## Releasing
+
+Push a tag `firefox-v<version>` or `chrome-v<version>` whose number equals that folder's `manifest.json` version. `release.yml` checks it, runs the tests, builds the zip and creates the GitHub release. For Firefox it also signs a private (unlisted) add-on if the repo secrets `AMO_JWT_ISSUER` and `AMO_JWT_SECRET` exist. Mozilla rejects a version number it has already signed, so each Firefox release needs a new version. The Firefox add-on's developer page is https://addons.mozilla.org/en-US/developers/addon/fdb422307dd04e4c91e8/. Chrome Web Store publishing is not set up.
+
+The current version is in each `manifest.json`; published versions are on the repository's Releases page. The whole flow (commit, version bump, push, tags, checking the releases) is in the `release-tab-labels` skill.
+
+## Gotchas
+
+- Firefox MV3 host permissions can be revoked by the user; labels then cannot show.
+- Labels cannot be shown on `about:`/`chrome://` pages, the PDF viewer or the add-on stores. The label is still stored.
+- A label's name is optional but its emoji is required (`validateLabel`). The title prefix is `emoji name · title`; with the name off it is `emoji · title`.
+- Removing a label in Firefox stores an empty string for the tab instead of deleting the value, so container rules and session restore do not re-label it.
+- The picker's emoji list must all pass `validateLabel`; a unit test checks this when emoji are added.
