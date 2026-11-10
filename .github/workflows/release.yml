@@ -5,9 +5,11 @@ name: Release
 #   chrome-v1.2.0    releases the Chrome extension
 # The number in the tag must match "version" in that browser's manifest.json.
 #
-# Firefox is also signed as a private (unlisted) add-on when the repository has the
-# secrets AMO_JWT_ISSUER and AMO_JWT_SECRET. Without them the release still contains
-# the zip, just not the signed .xpi.
+# Firefox is signed as a private (unlisted) add-on only when the repository variable
+# AMO_SIGN_UNLISTED is "true" and the secrets AMO_JWT_ISSUER and AMO_JWT_SECRET exist.
+# Otherwise the release holds just the zip, which is what is uploaded by hand to
+# addons.mozilla.org as a public (listed) version. Mozilla refuses a version number it
+# has already signed, so signing here would use up the number the listing needs.
 #
 # It can also be started by hand for a tag that already exists, to build, sign and
 # attach the files to that tag's release (the release is updated, not recreated):
@@ -72,7 +74,7 @@ jobs:
         run: echo "zip=$(bash scripts/build.sh "$BROWSER")" >> "$GITHUB_OUTPUT"
 
       - name: Sign the Firefox add-on (private, not published on addons.mozilla.org)
-        if: steps.tag.outputs.browser == 'firefox' && env.AMO_JWT_ISSUER != ''
+        if: steps.tag.outputs.browser == 'firefox' && vars.AMO_SIGN_UNLISTED == 'true' && env.AMO_JWT_ISSUER != ''
         run: >
           npx --yes web-ext@8 sign
           --source-dir dist/firefox

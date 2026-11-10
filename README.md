@@ -21,7 +21,7 @@ The Firefox add-on is registered on addons.mozilla.org as a private (unlisted) a
 
 Releases are on the repository's **Releases** page. Tags are per browser, so each release is for one browser.
 
-- **Firefox:** download the signed `.xpi` (when the release has one) and open it in Firefox. Otherwise download the zip and follow the Firefox README.
+- **Firefox:** install it from the addons.mozilla.org listing, or download the signed `.xpi` (only older releases and releases made with signing switched on have one). Otherwise download the zip and follow the Firefox README.
 - **Chrome:** download the zip and unzip it. In `chrome://extensions` switch on Developer mode, click **Load unpacked** and choose the unzipped folder.
 
 ## Working on it
@@ -70,7 +70,7 @@ To have the release workflow sign it as a private (unlisted) add-on and attach t
 2. Store them as two repository secrets, `AMO_JWT_ISSUER` (the JWT issuer) and `AMO_JWT_SECRET` (the JWT secret). From a terminal, `gh secret set AMO_JWT_ISSUER --repo moamstripes/tab-labels` and then the same for `AMO_JWT_SECRET`; each command asks for the value and hides it as you paste. Or use Settings, Secrets and variables, Actions on GitHub. Do not paste the values into chat, issues or files.
 3. Check they are there with `gh secret list --repo moamstripes/tab-labels` (it lists names only).
 
-Without these secrets the Firefox release still happens, just with the zip and no `.xpi`. Mozilla rejects a version number it has already signed, so each Firefox release needs a new version.
+Signing is **off by default** since the add-on went on the public listing: the workflow only signs when the repository variable `AMO_SIGN_UNLISTED` is `true` (`gh variable set AMO_SIGN_UNLISTED --body true --repo moamstripes/tab-labels`) as well as the two secrets. Otherwise the Firefox release holds just the zip, which is what gets uploaded by hand to addons.mozilla.org as a public version. Mozilla rejects a version number it has already signed, so signing here would use up the number the listing needs; each Firefox version needs a new number either way.
 
 To sign a version that was released earlier without a signed file, run the workflow by hand for its tag: `gh workflow run release.yml -f tag=firefox-v1.2.0`. It rebuilds the zip, signs it, and adds the files to the existing release.
 

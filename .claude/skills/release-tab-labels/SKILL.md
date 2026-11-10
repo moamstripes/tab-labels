@@ -35,7 +35,7 @@ Work from `~/Documents/tab-labels`. Both browsers are normally released together
 
 8. **Verify the releases.** For each tag: `gh release view <tag> --json url,assets`. Download the zip into the scratchpad, check `unzip -p <zip> manifest.json` shows the right version, and that the zip holds only runtime files (no `test/`, `docs/`, README).
 
-9. **Report** both release links and the zip names. For Firefox, say whether a signed `.xpi` is attached. It is only added when the repository has the secrets `AMO_JWT_ISSUER` and `AMO_JWT_SECRET` (check names with `gh secret list`, never values). If a Firefox release is missing its `.xpi`, `gh workflow run release.yml -f tag=firefox-vX.Y.Z` signs that tag and adds the file to the existing release.
+9. **Report** both release links and the zip names. For Firefox, say whether a signed `.xpi` is attached. Signing is off by default (the version numbers are uploaded by hand to the public listing, and Mozilla refuses a number it has already signed): the workflow signs only when the repository variable `AMO_SIGN_UNLISTED` is `true` and the secrets `AMO_JWT_ISSUER` and `AMO_JWT_SECRET` exist (check names with `gh secret list` and `gh variable list`, never values). Do not switch signing on without asking. Then tell the user the Firefox zip is the file to upload to addons.mozilla.org.
 
 ## When something goes wrong
 
