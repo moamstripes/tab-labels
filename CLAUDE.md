@@ -66,6 +66,7 @@ The current version is in each `manifest.json`; published versions are on the re
 - Never keep page state only in the content script's memory: after an update the old script is dead but its changes stay. The applied title prefix and the hidden icon links are recorded in the page (`data-tab-labels-*` attributes). Titles are always normalised with `TabLabels.normaliseTitle` (one prefix, at the front, whatever else is in the title).
 - Updates: Firefox kills the old content script, Chrome leaves it running in open tabs (cut off, but its observer still runs) and also clears `storage.session`. See the "Doubled labels" section of the spec. To test an update, install an older release from git (`git archive firefox-vX.Y.Z firefox`) and then the new code over it in a throwaway profile.
 
+- Group tabs by container (Firefox only): `groupByContainer`, planner `TabLabels.planContainerGroups` (pure, tested), runner `syncGroups` in `background.js`. It must never touch pinned tabs, tabs already in a group, or groups the user made (ownership is `storage.session` `ownedGroups` or a title equal to the label). See the last section of the spec.
 - Firefox MV3 host permissions can be revoked by the user; labels then cannot show.
 - Labels cannot be shown on `about:`/`chrome://` pages, the PDF viewer or the add-on stores. The label is still stored.
 - A label's name is optional but its emoji is required (`validateLabel`). The title prefix is `emoji name · title`; with the name off it is `emoji · title`.

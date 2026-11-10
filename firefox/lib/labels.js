@@ -12,7 +12,7 @@
 
   // Every key the extension keeps in storage.local. displayMode is the pre-1.1
   // setting, read only so existing installs keep their choice.
-  const SETTINGS_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "displayMode", "colorMode"];
+  const SETTINGS_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "groupByContainer", "displayMode", "colorMode"];
 
   const DEFAULT_LABELS = [
     { id: "waiting", name: "Waiting", emoji: "⏳", colour: "#d98e04" },
@@ -25,6 +25,7 @@
       labels: DEFAULT_LABELS.map((l) => Object.assign({}, l)),
       display: { favicon: true, title: true, emoji: true },
       containerRules: {},
+      groupByContainer: false,
       colorMode: "system",
     };
   }
@@ -92,6 +93,7 @@
     if (Array.isArray(raw.labels)) out.labels = normaliseLabels(raw.labels);
     out.display = normaliseDisplay(raw);
     out.containerRules = normaliseRules(raw.containerRules);
+    out.groupByContainer = raw.groupByContainer === true;
     out.colorMode = raw.colorMode === "light" || raw.colorMode === "dark" ? raw.colorMode : "system";
     return out;
   }
@@ -109,6 +111,61 @@
   function ruleLabelId(rules, cookieStoreId) {
     if (!rules || typeof cookieStoreId !== "string") return null;
     return Object.prototype.hasOwnProperty.call(rules, cookieStoreId) ? rules[cookieStoreId] : null;
+  }
+
+  // The name of the tab group made for a container: its label's name, or the emoji when the label has none.
+  function groupTitle(label) {
+    return label.name ? label.name : label.emoji;
+  }
+
+  // Works out what to do so each container that has a label gets one tab group per window, named after
+  // that label. Pure: it only reads the tabs ({ id, windowId, cookieStoreId, pinned, groupId }, groupId
+  // below 0 means none) and the group titles ({ groupId: title }), and returns the steps to carry out,
+  // each { windowId, cookieStoreId, title, groupId (an existing group or null), tabIds, retitle }.
+  // Pinned tabs and tabs already in a group are left alone. A group counts as a container's own only
+  // if it holds that container's tabs and nothing else, and it is either named like the label or was
+  // made by this extension (options.ownedGroups, a list of group ids): only those are joined or
+  // renamed, so a group the user made themselves is never touched. options.containers limits it to
+  // some containers; options.regroup false only renames groups that already exist.
+  function planContainerGroups(tabs, groupTitles, settings, options) {
+    if (!settings || settings.groupByContainer !== true) return [];
+    const opts = options || {};
+    const regroup = opts.regroup !== false;
+    const only = Array.isArray(opts.containers) ? opts.containers : null;
+    const owned = Array.isArray(opts.ownedGroups) ? opts.ownedGroups : [];
+    const inGroup = (t) => typeof t.groupId === "number" && t.groupId >= 0;
+    const plan = [];
+    const windowIds = [];
+    for (const t of tabs) if (!windowIds.includes(t.windowId)) windowIds.push(t.windowId);
+    for (const windowId of windowIds) {
+      const inWindow = tabs.filter((t) => t.windowId === windowId);
+      const holds = new Map(); // groupId -> the containers whose tabs are in it
+      for (const t of inWindow) {
+        if (!inGroup(t)) continue;
+        if (!holds.has(t.groupId)) holds.set(t.groupId, new Set());
+        holds.get(t.groupId).add(t.cookieStoreId);
+      }
+      for (const cookieStoreId of Object.keys(settings.containerRules)) {
+        if (only && !only.includes(cookieStoreId)) continue;
+        const label = findLabel(settings.labels, ruleLabelId(settings.containerRules, cookieStoreId));
+        if (!label) continue;
+        const title = groupTitle(label);
+        let existing = null;
+        for (const [groupId, containers] of holds) {
+          if (containers.size === 1 && containers.has(cookieStoreId) && (groupTitles[groupId] === title || owned.includes(groupId))) {
+            existing = groupId;
+            break;
+          }
+        }
+        const tabIds = regroup
+          ? inWindow.filter((t) => t.cookieStoreId === cookieStoreId && !t.pinned && !inGroup(t)).map((t) => t.id)
+          : [];
+        const retitle = existing !== null && groupTitles[existing] !== title;
+        if (!tabIds.length && !retitle) continue;
+        plan.push({ windowId, cookieStoreId, title, groupId: existing, tabIds, retitle });
+      }
+    }
+    return plan;
   }
 
   function makeId(name, existingIds) {
@@ -280,6 +337,8 @@
     normaliseSettings,
     ruleLabelId,
     displayForTab,
+    groupTitle,
+    planContainerGroups,
     makeId,
     findLabel,
     titlePrefix,

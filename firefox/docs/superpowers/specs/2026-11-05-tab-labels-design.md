@@ -135,3 +135,11 @@ The content script finds the page's icon URL (`link rel~=icon`, falling back to 
 ## Space theme removed (after 1.5.1, same in both browsers)
 
 The "Take me to space" button, its `spaceTheme` setting, the `data-space` styles, `options/space.svg` and the website's matching button and screenshot were all removed. Everything about the space theme in the two sections above is history. A `spaceTheme` value left in `storage.local` by an older version is ignored (it is no longer in `SETTINGS_KEYS`). The light/dark button stays and is never disabled now.
+
+## Group tabs by container (Firefox only, 1.6.0)
+
+- **Setting.** `groupByContainer` in `storage.local` (default false, only `true` turns it on), a switch `#group-toggle` at the top of the Containers card. Chrome has no containers, so it has no equivalent.
+- **Behaviour.** Each container that has a label rule gets one tab group per window, titled with the label's name (the emoji when the name is empty; `TabLabels.groupTitle`). `TabLabels.planContainerGroups` is the pure planner (tested): from the open tabs, the group titles and the settings it returns the steps `{ windowId, cookieStoreId, title, groupId, tabIds, retitle }`. `syncGroups` in `background.js` runs it through a queue and carries the steps out with `tabs.group` and `tabGroups.update`.
+- **When it runs.** The switch is turned on (all containers), a tab is created (that container, after its rule has been applied), a container's rule changes (those containers), and labels are saved (rename only).
+- **What it never touches.** Pinned tabs, tabs already in a group, and groups it did not make. A group counts as a container's own only if it holds that container's tabs and nothing else, and it is either named like the label or its id is in `storage.session` (`ownedGroups`, forgotten when the browser quits; after a restart a restored group is adopted again by its title). Turning the setting off leaves existing groups alone.
+- **API.** Needs the `tabGroups` permission (not shown in install prompts) and Firefox 139 or newer for `tabGroups`; the add-on's minimum is 140. Tested in headless Firefox 159 with `browser.tabs.groups.enabled` on; not tested across a browser restart or with session restore.

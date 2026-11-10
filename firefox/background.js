@@ -106,6 +106,8 @@ browser.storage.onChanged.addListener((changes, area) => {
   if (changes.labels) rebuildMenu();
   if (DISPLAY_KEYS.some((key) => changes[key])) refreshAllTabs();
   if (changes.containerRules) applyChangedRules(changes.containerRules).catch(logError);
+  if (changes.groupByContainer && changes.groupByContainer.newValue === true) syncGroups();
+  if (changes.labels) syncGroups({ regroup: false });
 });
 
 rebuildMenu();
@@ -128,6 +130,7 @@ async function autoAssign(tab, settings) {
 browser.tabs.onCreated.addListener((tab) => {
   loadSettings()
     .then((settings) => autoAssign(tab, settings))
+    .then(() => syncGroups({ containers: [tab.cookieStoreId] }))
     .catch(logError);
 });
 
@@ -141,6 +144,51 @@ async function applyChangedRules(change) {
   for (const tab of await browser.tabs.query({})) {
     if (changed.includes(tab.cookieStoreId)) await autoAssign(tab, settings);
   }
+  await syncGroups({ containers: changed });
+}
+
+// Tab groups: with "Group tabs by container" on, the tabs of a container that has a label sit in a
+// tab group named after that label, one group per window. Only groups this extension made (their ids
+// are kept in storage.session) or ones named like the label are ever joined or renamed. Pinned tabs
+// and tabs the user has already put in a group are left alone. Turning the setting off leaves
+// existing groups as they are.
+
+const OWNED_GROUPS_KEY = "ownedGroups";
+
+let groupQueue = Promise.resolve();
+
+function syncGroups(options) {
+  groupQueue = groupQueue.then(() => runGroupSync(options)).catch(logError);
+  return groupQueue;
+}
+
+async function runGroupSync(options) {
+  const settings = await loadSettings();
+  if (!settings.groupByContainer) return;
+  const tabs = await browser.tabs.query({});
+  const groups = await browser.tabGroups.query({});
+  const titles = {};
+  for (const g of groups) titles[g.id] = g.title;
+  const stored = await browser.storage.session.get(OWNED_GROUPS_KEY);
+  const owned = new Set(Array.isArray(stored[OWNED_GROUPS_KEY]) ? stored[OWNED_GROUPS_KEY] : []);
+  for (const id of owned) if (!(id in titles)) owned.delete(id); // forget groups that are gone
+  const plan = TabLabels.planContainerGroups(tabs, titles, settings, Object.assign({}, options, { ownedGroups: [...owned] }));
+  for (const step of plan) {
+    try {
+      let groupId = step.groupId;
+      if (step.tabIds.length) {
+        groupId =
+          groupId === null
+            ? await browser.tabs.group({ tabIds: step.tabIds, createProperties: { windowId: step.windowId } })
+            : await browser.tabs.group({ tabIds: step.tabIds, groupId });
+      }
+      if (step.groupId === null) owned.add(groupId);
+      if (step.groupId === null || step.retitle) await browser.tabGroups.update(groupId, { title: step.title });
+    } catch (e) {
+      logError(e); // one container failing must not stop the others
+    }
+  }
+  await browser.storage.session.set({ [OWNED_GROUPS_KEY]: [...owned] });
 }
 
 // Content script requests

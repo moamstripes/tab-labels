@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tab Labels",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "description": "Tag tabs with coloured labels from the tab right-click menu. Local only, no data leaves Firefox.",
   "browser_specific_settings": {
     "gecko": {
@@ -19,7 +19,7 @@
     "48": "icons/icon.svg",
     "96": "icons/icon.svg"
   },
-  "permissions": ["menus", "tabs", "storage", "sessions", "contextualIdentities", "cookies", "scripting"],
+  "permissions": ["menus", "tabs", "storage", "sessions", "contextualIdentities", "cookies", "scripting", "tabGroups"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "scripts": ["lib/labels.js", "background.js"]

@@ -2,7 +2,7 @@ const manifest = JSON.parse(readFile("manifest.json"));
 
 test("manifest is Manifest V3 with the required permissions", () => {
   assertEqual(manifest.manifest_version, 3);
-  for (const p of ["menus", "tabs", "storage", "sessions", "contextualIdentities", "cookies", "scripting"]) {
+  for (const p of ["menus", "tabs", "storage", "sessions", "contextualIdentities", "cookies", "scripting", "tabGroups"]) {
     assertTrue(manifest.permissions.includes(p), "missing permission " + p);
   }
   assertTrue(manifest.host_permissions.includes("<all_urls>"), "missing host permission");
@@ -63,6 +63,14 @@ test("settings page: import, export and reset are icon buttons with names, at th
     assertTrue(!!m, id + " button is not in the Labels card header");
     assertTrue(/aria-label="[^"]+"/.test(m[0]) && /title="[^"]+"/.test(m[0]), id + " needs a title and an aria-label");
   }
+});
+
+test("settings page (Firefox): the group-by-container switch is in the Containers card", () => {
+  const html = readFile("options/options.html");
+  const card = html.slice(html.indexOf("<h2>Containers</h2>"), html.indexOf('id="containers"'));
+  assertTrue(card.includes('id="group-toggle"') && card.includes('class="switch"'), "the switch must be in the Containers card, above the list");
+  assertTrue(card.includes("Group tabs by container"), "the switch needs its name");
+  assertTrue(!html.slice(html.indexOf("<aside"), html.indexOf("</aside>")).includes("group-toggle"), "it does not belong in the sidebar");
 });
 
 test("settings page (Firefox): Containers come after Labels", () => {

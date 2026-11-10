@@ -7,6 +7,7 @@ const containersEl = document.getElementById("containers");
 const containersNote = document.getElementById("containers-note");
 const importFileEl = document.getElementById("import-file");
 const modeButton = document.getElementById("mode-button");
+const groupToggle = document.getElementById("group-toggle");
 
 const TOGGLES = { showFavicon: "favicon", showTitle: "title", showEmoji: "emoji" };
 const IMPORT_MAX_BYTES = 256 * 1024;
@@ -302,6 +303,7 @@ async function load() {
   for (const input of document.querySelectorAll("input[data-key]")) {
     if (!flipped.has(input.dataset.key)) input.checked = settings.display[TOGGLES[input.dataset.key]];
   }
+  if (!flipped.has("groupByContainer")) groupToggle.checked = settings.groupByContainer;
   if (!flipped.has("colorMode")) applyMode(settings.colorMode);
   render();
   await renderContainers(settings);
@@ -348,6 +350,12 @@ for (const input of document.querySelectorAll("input[data-key]")) {
     setStatus("Saved.", false);
   });
 }
+
+groupToggle.addEventListener("change", async () => {
+  flipped.add("groupByContainer");
+  await browser.storage.local.set({ groupByContainer: groupToggle.checked });
+  setStatus(groupToggle.checked ? "Tabs will be grouped by container." : "Saved. Existing groups stay as they are.", false);
+});
 
 load();
 

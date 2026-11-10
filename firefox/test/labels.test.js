@@ -194,7 +194,7 @@ test("isColour accepts only #rrggbb", () => {
 test("SETTINGS_KEYS lists every stored setting", () => {
   assertEqual(
     TabLabels.SETTINGS_KEYS,
-    ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "displayMode", "colorMode"]
+    ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "groupByContainer", "displayMode", "colorMode"]
   );
 });
 
@@ -371,4 +371,115 @@ test("any other colour mode value falls back to the system setting", () => {
   for (const value of ["Dark", "auto", "", 1, true, null, {}]) {
     assertEqual(TabLabels.normaliseSettings({ colorMode: value }).colorMode, "system");
   }
+});
+
+test("grouping by container is off by default and only an exact true turns it on", () => {
+  assertEqual(TabLabels.defaultSettings().groupByContainer, false);
+  assertEqual(TabLabels.normaliseSettings({}).groupByContainer, false);
+  assertEqual(TabLabels.normaliseSettings({ groupByContainer: true }).groupByContainer, true);
+  for (const value of ["yes", 1, "true", null, {}, []]) {
+    assertEqual(TabLabels.normaliseSettings({ groupByContainer: value }).groupByContainer, false);
+  }
+});
+
+test("groupTitle is the label name, or the emoji when the name is empty", () => {
+  assertEqual(TabLabels.groupTitle({ name: "Waiting", emoji: "⏳" }), "Waiting");
+  assertEqual(TabLabels.groupTitle({ name: "", emoji: "⏳" }), "⏳");
+});
+
+function groupSettings(extra) {
+  return Object.assign(
+    {
+      labels: [
+        { id: "waiting", name: "Waiting", emoji: "⏳", colour: "#d98e04" },
+        { id: "quiet", name: "", emoji: "🔕", colour: "#4a7fd4" },
+      ],
+      containerRules: { "firefox-container-1": "waiting", "firefox-container-2": "quiet" },
+      groupByContainer: true,
+    },
+    extra
+  );
+}
+
+function tabIn(id, container, extra) {
+  return Object.assign({ id, windowId: 1, cookieStoreId: container, pinned: false, groupId: -1 }, extra);
+}
+
+test("planContainerGroups does nothing while the setting is off", () => {
+  const tabs = [tabIn(1, "firefox-container-1")];
+  assertEqual(TabLabels.planContainerGroups(tabs, {}, groupSettings({ groupByContainer: false })), []);
+});
+
+test("planContainerGroups makes one new group per container that has a label, named after it", () => {
+  const tabs = [
+    tabIn(1, "firefox-container-1"),
+    tabIn(2, "firefox-container-1"),
+    tabIn(3, "firefox-container-2"),
+    tabIn(4, "firefox-default"),
+    tabIn(5, "firefox-container-9"),
+  ];
+  assertEqual(TabLabels.planContainerGroups(tabs, {}, groupSettings()), [
+    { windowId: 1, cookieStoreId: "firefox-container-1", title: "Waiting", groupId: null, tabIds: [1, 2], retitle: false },
+    { windowId: 1, cookieStoreId: "firefox-container-2", title: "🔕", groupId: null, tabIds: [3], retitle: false },
+  ]);
+});
+
+test("planContainerGroups keeps windows apart", () => {
+  const tabs = [tabIn(1, "firefox-container-1"), tabIn(2, "firefox-container-1", { windowId: 2 })];
+  const plan = TabLabels.planContainerGroups(tabs, {}, groupSettings());
+  assertEqual(plan.map((p) => [p.windowId, p.tabIds]), [[1, [1]], [2, [2]]]);
+});
+
+test("planContainerGroups leaves pinned tabs, tabs already in a group and the user's own groups alone", () => {
+  const tabs = [
+    tabIn(1, "firefox-container-1", { pinned: true }),
+    tabIn(2, "firefox-container-1", { groupId: 7 }),
+    tabIn(3, "firefox-container-1"),
+  ];
+  const plan = TabLabels.planContainerGroups(tabs, { 7: "My own group" }, groupSettings());
+  assertEqual(plan, [{ windowId: 1, cookieStoreId: "firefox-container-1", title: "Waiting", groupId: null, tabIds: [3], retitle: false }]);
+});
+
+test("planContainerGroups adds new tabs to the container's existing group", () => {
+  const tabs = [tabIn(1, "firefox-container-1", { groupId: 7 }), tabIn(2, "firefox-container-1")];
+  assertEqual(TabLabels.planContainerGroups(tabs, { 7: "Waiting" }, groupSettings()), [
+    { windowId: 1, cookieStoreId: "firefox-container-1", title: "Waiting", groupId: 7, tabIds: [2], retitle: false },
+  ]);
+});
+
+test("planContainerGroups renames a group this extension made for that container", () => {
+  const tabs = [tabIn(1, "firefox-container-1", { groupId: 7 })];
+  assertEqual(TabLabels.planContainerGroups(tabs, { 7: "Old name" }, groupSettings(), { ownedGroups: [7] }), [
+    { windowId: 1, cookieStoreId: "firefox-container-1", title: "Waiting", groupId: 7, tabIds: [], retitle: true },
+  ]);
+});
+
+test("planContainerGroups never renames or joins a group that holds other containers' tabs", () => {
+  const tabs = [
+    tabIn(1, "firefox-container-1", { groupId: 7 }),
+    tabIn(2, "firefox-container-2", { groupId: 7 }),
+    tabIn(3, "firefox-container-1"),
+  ];
+  const plan = TabLabels.planContainerGroups(tabs, { 7: "Mixed" }, groupSettings(), { ownedGroups: [7] });
+  assertEqual(plan, [{ windowId: 1, cookieStoreId: "firefox-container-1", title: "Waiting", groupId: null, tabIds: [3], retitle: false }]);
+});
+
+test("planContainerGroups can be limited to some containers, or to renaming only", () => {
+  const tabs = [tabIn(1, "firefox-container-1"), tabIn(2, "firefox-container-2"), tabIn(3, "firefox-container-2", { groupId: 8 })];
+  const only = TabLabels.planContainerGroups(tabs, { 8: "x" }, groupSettings(), { containers: ["firefox-container-1"] });
+  assertEqual(only.map((p) => p.cookieStoreId), ["firefox-container-1"]);
+  const renameOnly = TabLabels.planContainerGroups(tabs, { 8: "x" }, groupSettings(), { regroup: false, ownedGroups: [8] });
+  assertEqual(renameOnly, [{ windowId: 1, cookieStoreId: "firefox-container-2", title: "🔕", groupId: 8, tabIds: [], retitle: true }]);
+});
+
+test("planContainerGroups skips containers with no rule, or a rule whose label is gone", () => {
+  const tabs = [tabIn(1, "firefox-container-1"), tabIn(2, "firefox-container-3")];
+  const settings = groupSettings({ containerRules: { "firefox-container-1": "deleted" } });
+  assertEqual(TabLabels.planContainerGroups(tabs, {}, settings), []);
+});
+
+test("planContainerGroups adopts a group named like the label, for example one restored after a restart", () => {
+  const tabs = [tabIn(1, "firefox-container-1", { groupId: 7 }), tabIn(2, "firefox-container-1")];
+  const plan = TabLabels.planContainerGroups(tabs, { 7: "Waiting" }, groupSettings(), { ownedGroups: [] });
+  assertEqual(plan.map((p) => [p.groupId, p.tabIds, p.retitle]), [[7, [2], false]]);
 });

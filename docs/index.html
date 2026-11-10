@@ -486,6 +486,7 @@
             <li><strong>Three labels to start with:</strong> Waiting, Paused and To do. Add your own, each with an emoji, a colour and an optional name.</li>
             <li><strong>Show it the way you like.</strong> Three separate switches: a coloured dot on the tab icon, the label name in the title, and the emoji in the title. Any combination works.</li>
             <li><strong>Containers.</strong> Give a container a label, and every new tab opened in it gets that label automatically. It works well alongside <a href="https://addons.mozilla.org/en-US/firefox/addon/container-bookmarks/" rel="noopener">Container Bookmarks</a>, a separate add-on that opens bookmarks in a container of your choice: a bookmark opens in its container and, once you have picked a label for that container, arrives already labelled. Tab Labels is not affiliated with Container Bookmarks.</li>
+            <li><strong>Group tabs by container.</strong> An optional switch in the Containers settings puts each container's tabs in a Firefox tab group named after that container's label. New tabs join the group. Tabs outside containers, pinned tabs and groups you made yourself are left alone.</li>
             <li><strong>An emoji picker</strong> with search. Your computer's own emoji menu works in its search box too.</li>
             <li><strong>Move your labels around.</strong> Export your labels to a file and import them on another computer.</li>
             <li><strong>Labels stay put.</strong> A tab keeps its label while you browse, and after Firefox restarts if Firefox restores your tabs.</li>
@@ -526,6 +527,7 @@
               <tr><th scope="row"><code>sessions</code></th><td>To remember each tab's label, including after Firefox restarts.</td></tr>
               <tr><th scope="row"><code>contextualIdentities</code></th><td>To list your containers, so each can have a label.</td></tr>
               <tr><th scope="row"><code>cookies</code></th><td>Only so Firefox tells the extension which container a tab belongs to. The extension does not read or change any cookie.</td></tr>
+              <tr><th scope="row"><code>tabGroups</code></th><td>To name the tab group made for a container, when you switch on <em>Group tabs by container</em>.</td></tr>
               <tr><th scope="row"><code>scripting</code></th><td>To add the label code to tabs that were already open when the extension was installed or updated (the <em>Refresh</em> button).</td></tr>
             </tbody>
           </table>
