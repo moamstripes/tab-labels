@@ -7,7 +7,6 @@ const containersEl = document.getElementById("containers");
 const containersNote = document.getElementById("containers-note");
 const importFileEl = document.getElementById("import-file");
 const modeButton = document.getElementById("mode-button");
-const groupToggle = document.getElementById("group-toggle");
 
 const TOGGLES = { showFavicon: "favicon", showTitle: "title", showEmoji: "emoji" };
 const IMPORT_MAX_BYTES = 256 * 1024;
@@ -263,6 +262,32 @@ async function setContainerRule(cookieStoreId, labelId) {
   setStatus("Container saved.", false);
 }
 
+async function setContainerGrouping(cookieStoreId, on) {
+  const stored = await browser.storage.local.get("groupContainers");
+  const current = TabLabels.normaliseSettings({ groupContainers: stored.groupContainers }).groupContainers;
+  if (on) current[cookieStoreId] = true;
+  else delete current[cookieStoreId];
+  await browser.storage.local.set({ groupContainers: current });
+  setStatus(on ? "Tabs in this container will be grouped." : "Saved. Existing groups stay as they are.", false);
+}
+
+function makeGroupSwitch(container, checked, enabled) {
+  const wrap = document.createElement("label");
+  wrap.className = "group-toggle";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.className = "switch group-switch";
+  input.checked = checked;
+  input.disabled = !enabled;
+  input.setAttribute("aria-label", "Group tabs from the " + container.name + " container");
+  input.title = enabled ? "Group this container's tabs in a tab group named after its label" : "Pick a label for this container first";
+  input.addEventListener("change", () => setContainerGrouping(container.cookieStoreId, input.checked));
+  const text = document.createElement("span");
+  text.textContent = "Group";
+  wrap.append(input, text);
+  return { wrap, input };
+}
+
 async function renderContainers(settings) {
   containersEl.textContent = "";
   const containers = await listContainers();
@@ -284,12 +309,17 @@ async function renderContainers(settings) {
     const name = document.createElement("span");
     name.className = "container-name";
     name.textContent = c.name;
+    const ruleId = TabLabels.ruleLabelId(settings.containerRules, c.cookieStoreId);
+    const group = makeGroupSwitch(c, settings.groupContainers[c.cookieStoreId] === true, !!TabLabels.findLabel(settings.labels, ruleId));
     li.append(
       dot,
       name,
-      makeLabelSelect(settings.labels, TabLabels.ruleLabelId(settings.containerRules, c.cookieStoreId), (id) =>
-        setContainerRule(c.cookieStoreId, id)
-      )
+      group.wrap,
+      makeLabelSelect(settings.labels, ruleId, (id) => {
+        group.input.disabled = !id; // a group is named after the label, so it needs one
+        group.input.title = id ? "Group this container's tabs in a tab group named after its label" : "Pick a label for this container first";
+        return setContainerRule(c.cookieStoreId, id);
+      })
     );
     containersEl.appendChild(li);
   }
@@ -303,7 +333,6 @@ async function load() {
   for (const input of document.querySelectorAll("input[data-key]")) {
     if (!flipped.has(input.dataset.key)) input.checked = settings.display[TOGGLES[input.dataset.key]];
   }
-  if (!flipped.has("groupByContainer")) groupToggle.checked = settings.groupByContainer;
   if (!flipped.has("colorMode")) applyMode(settings.colorMode);
   render();
   await renderContainers(settings);
@@ -350,12 +379,6 @@ for (const input of document.querySelectorAll("input[data-key]")) {
     setStatus("Saved.", false);
   });
 }
-
-groupToggle.addEventListener("change", async () => {
-  flipped.add("groupByContainer");
-  await browser.storage.local.set({ groupByContainer: groupToggle.checked });
-  setStatus(groupToggle.checked ? "Tabs will be grouped by container." : "Saved. Existing groups stay as they are.", false);
-});
 
 load();
 

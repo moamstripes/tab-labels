@@ -12,7 +12,7 @@
 
   // Every key the extension keeps in storage.local. displayMode is the pre-1.1
   // setting, read only so existing installs keep their choice.
-  const SETTINGS_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "groupByContainer", "displayMode", "colorMode"];
+  const SETTINGS_KEYS = ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "groupContainers", "displayMode", "colorMode"];
 
   const DEFAULT_LABELS = [
     { id: "waiting", name: "Waiting", emoji: "⏳", colour: "#d98e04" },
@@ -25,7 +25,7 @@
       labels: DEFAULT_LABELS.map((l) => Object.assign({}, l)),
       display: { favicon: true, title: true, emoji: true },
       containerRules: {},
-      groupByContainer: false,
+      groupContainers: {},
       colorMode: "system",
     };
   }
@@ -87,13 +87,23 @@
     return rules;
   }
 
+  // Which containers have "group tabs" switched on: { cookieStoreId: true }. Off unless exactly true.
+  function normaliseGroupContainers(raw) {
+    const on = {};
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return on;
+    for (const key of Object.keys(raw)) {
+      if (CONTAINER_ID_RE.test(key) && raw[key] === true) on[key] = true;
+    }
+    return on;
+  }
+
   function normaliseSettings(raw) {
     const out = defaultSettings();
     if (!raw || typeof raw !== "object") return out;
     if (Array.isArray(raw.labels)) out.labels = normaliseLabels(raw.labels);
     out.display = normaliseDisplay(raw);
     out.containerRules = normaliseRules(raw.containerRules);
-    out.groupByContainer = raw.groupByContainer === true;
+    out.groupContainers = normaliseGroupContainers(raw.groupContainers);
     out.colorMode = raw.colorMode === "light" || raw.colorMode === "dark" ? raw.colorMode : "system";
     return out;
   }
@@ -118,7 +128,7 @@
     return label.name ? label.name : label.emoji;
   }
 
-  // Works out what to do so each container that has a label gets one tab group per window, named after
+  // Works out what to do so each switched-on container that has a label gets one tab group per window, named after
   // that label. Pure: it only reads the tabs ({ id, windowId, cookieStoreId, pinned, groupId }, groupId
   // below 0 means none) and the group titles ({ groupId: title }), and returns the steps to carry out,
   // each { windowId, cookieStoreId, title, groupId (an existing group or null), tabIds, retitle }.
@@ -128,7 +138,7 @@
   // renamed, so a group the user made themselves is never touched. options.containers limits it to
   // some containers; options.regroup false only renames groups that already exist.
   function planContainerGroups(tabs, groupTitles, settings, options) {
-    if (!settings || settings.groupByContainer !== true) return [];
+    if (!settings || !settings.groupContainers) return [];
     const opts = options || {};
     const regroup = opts.regroup !== false;
     const only = Array.isArray(opts.containers) ? opts.containers : null;
@@ -146,6 +156,7 @@
         holds.get(t.groupId).add(t.cookieStoreId);
       }
       for (const cookieStoreId of Object.keys(settings.containerRules)) {
+        if (settings.groupContainers[cookieStoreId] !== true) continue;
         if (only && !only.includes(cookieStoreId)) continue;
         const label = findLabel(settings.labels, ruleLabelId(settings.containerRules, cookieStoreId));
         if (!label) continue;

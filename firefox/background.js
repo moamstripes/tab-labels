@@ -106,7 +106,7 @@ browser.storage.onChanged.addListener((changes, area) => {
   if (changes.labels) rebuildMenu();
   if (DISPLAY_KEYS.some((key) => changes[key])) refreshAllTabs();
   if (changes.containerRules) applyChangedRules(changes.containerRules).catch(logError);
-  if (changes.groupByContainer && changes.groupByContainer.newValue === true) syncGroups();
+  if (changes.groupContainers) applyChangedGrouping(changes.groupContainers).catch(logError);
   if (changes.labels) syncGroups({ regroup: false });
 });
 
@@ -147,11 +147,19 @@ async function applyChangedRules(change) {
   await syncGroups({ containers: changed });
 }
 
-// Tab groups: with "Group tabs by container" on, the tabs of a container that has a label sit in a
+// Tab groups: for each container whose "Group" switch is on (and that has a label), its tabs sit in a
 // tab group named after that label, one group per window. Only groups this extension made (their ids
 // are kept in storage.session) or ones named like the label are ever joined or renamed. Pinned tabs
-// and tabs the user has already put in a group are left alone. Turning the setting off leaves
-// existing groups as they are.
+// and tabs the user has already put in a group are left alone. Turning a switch off leaves existing
+// groups as they are.
+
+// When a container's switch is turned on, group the tabs it already has open.
+async function applyChangedGrouping(change) {
+  const before = TabLabels.normaliseSettings({ groupContainers: change.oldValue }).groupContainers;
+  const settings = await loadSettings();
+  const switchedOn = Object.keys(settings.groupContainers).filter((id) => !before[id]);
+  if (switchedOn.length) await syncGroups({ containers: switchedOn });
+}
 
 const OWNED_GROUPS_KEY = "ownedGroups";
 
@@ -164,7 +172,6 @@ function syncGroups(options) {
 
 async function runGroupSync(options) {
   const settings = await loadSettings();
-  if (!settings.groupByContainer) return;
   const tabs = await browser.tabs.query({});
   const groups = await browser.tabGroups.query({});
   const titles = {};

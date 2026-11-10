@@ -8,55 +8,40 @@
     <link rel="icon" type="image/svg+xml" href="../icons/label.svg" />
   </head>
   <body>
-    <main>
-      <header class="page-header">
-        <img src="../icons/icon.svg" alt="" width="44" height="44" />
-        <div>
-          <h1>Tab Labels</h1>
-          <p>Tag tabs with coloured labels. Everything stays in your browser.</p>
-        </div>
-        <div class="page-controls">
-          <button id="mode-button" type="button" class="btn icon-btn mode-button" data-mode="light" title="Switch to dark mode" aria-label="Switch to dark mode">
-            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z" /></svg>
-            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2.2m0 14.6v2.2M4.9 4.9l1.6 1.6m11 11 1.6 1.6M2.5 12h2.2m14.6 0h2.2M4.9 19.1l1.6-1.6m11-11 1.6-1.6" /></svg>
-          </button>
-        </div>
-      </header>
+    <div class="app">
+      <aside class="rail" aria-label="Display options">
+        <label class="rail-toggle" data-tip="Favicon bubble: a coloured dot in the top-left corner of the tab icon.">
+          <svg class="rail-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" /><circle cx="8.5" cy="10" r="1.7" fill="currentColor" /></svg>
+          <input type="checkbox" class="switch" data-key="showFavicon" aria-label="Favicon bubble: a coloured dot in the top-left corner of the tab icon." />
+        </label>
+        <label class="rail-toggle" data-tip="Title label: the label name in front of the page title.">
+          <svg class="rail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M12 7v11M8.5 18h7" /></svg>
+          <input type="checkbox" class="switch" data-key="showTitle" aria-label="Title label: the label name in front of the page title." />
+        </label>
+        <label class="rail-toggle" data-tip="Emoji: the label emoji in front of the page title. Works on its own or with the title label.">
+          <svg class="rail-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8.5 14.3a4.2 4.2 0 0 0 7 0M9.3 9.7h.01M14.7 9.7h.01" /></svg>
+          <input type="checkbox" class="switch" data-key="showEmoji" aria-label="Emoji: the label emoji in front of the page title. Works on its own or with the title label." />
+        </label>
+        <button id="refresh-tabs" type="button" class="btn icon-btn rail-refresh" data-tip="Refresh labels on all tabs: takes the labels off every open tab and puts them back. Use it if a tab shows a label twice or a wrong one, or if tabs that were open when the extension was installed or updated show nothing." aria-label="Refresh labels on all tabs: takes the labels off every open tab and puts them back. Use it if a tab shows a label twice or a wrong one, or if tabs that were open when the extension was installed or updated show nothing.">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 4v4h-4M20 15a8 8 0 0 1-14 3l-2-2M4 20v-4h4" /></svg>
+        </button>
+      </aside>
+      <main>
+        <header class="page-header">
+          <img src="../icons/icon.svg" alt="" width="44" height="44" />
+          <div>
+            <h1>Tab Labels</h1>
+            <p>Tag tabs with coloured labels. Everything stays in your browser.</p>
+          </div>
+          <div class="page-controls">
+            <button id="mode-button" type="button" class="btn icon-btn mode-button" data-mode="light" title="Switch to dark mode" aria-label="Switch to dark mode">
+              <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z" /></svg>
+              <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2.2m0 14.6v2.2M4.9 4.9l1.6 1.6m11 11 1.6 1.6M2.5 12h2.2m14.6 0h2.2M4.9 19.1l1.6-1.6m11-11 1.6-1.6" /></svg>
+            </button>
+          </div>
+        </header>
 
-      <div class="layout">
-        <aside class="sidebar" aria-label="Display options">
-          <section class="card">
-            <h2>Show labels</h2>
-            <p class="hint">Choose what appears on a labelled tab. Changes apply straight away.</p>
-            <label class="toggle">
-              <input type="checkbox" class="switch" data-key="showFavicon" />
-              <span class="toggle-text">
-                <strong>Favicon bubble</strong>
-                <small>A coloured dot in the top-left corner of the tab icon.</small>
-              </span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" class="switch" data-key="showTitle" />
-              <span class="toggle-text">
-                <strong>Title label</strong>
-                <small>The label name in front of the page title.</small>
-              </span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" class="switch" data-key="showEmoji" />
-              <span class="toggle-text">
-                <strong>Emoji</strong>
-                <small>The label emoji in front of the page title. Works on its own or with the title label.</small>
-              </span>
-            </label>
-            <div class="refresh-row">
-              <p class="hint">Takes the labels off every open tab and puts them back. Use it if a tab shows a label twice or a wrong one, or if tabs that were open when the extension was installed or updated show nothing.</p>
-              <button id="refresh-tabs" type="button" class="btn">Refresh labels on all tabs</button>
-            </div>
-          </section>
-        </aside>
-
-        <div class="content">
+        <div class="panels">
           <section class="card">
             <div class="card-head">
               <h2>Labels</h2>
@@ -84,23 +69,13 @@
 
           <section class="card">
             <h2>Containers</h2>
-            <p class="hint">
-              New tabs opened in a container get the label chosen here. A tab you label or unlabel yourself is left
-              alone. When you pick a label, open tabs in that container that have no label get it too.
-            </p>
-            <label class="toggle">
-              <input type="checkbox" class="switch" id="group-toggle" />
-              <span class="toggle-text">
-                <strong>Group tabs by container</strong>
-                <small>Tabs in a container that has a label go into a tab group named after that label.</small>
-              </span>
-            </label>
+            <p class="hint">New tabs in a container get its label. Switch on Group to put the container's tabs in a tab group named after that label.</p>
             <ul id="containers" class="list"></ul>
             <p id="containers-note" class="hint"></p>
           </section>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
     <div id="status" role="status" aria-live="polite"></div>
     <script src="../lib/labels.js"></script>
     <script src="../lib/emoji.js"></script>

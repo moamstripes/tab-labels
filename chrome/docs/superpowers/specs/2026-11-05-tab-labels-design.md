@@ -147,3 +147,8 @@ This folder is the Chrome port of the Firefox extension, with the same name, set
 ## Space theme removed (after 1.5.1, same in both browsers)
 
 The "Take me to space" button, its `spaceTheme` setting, the `data-space` styles, `options/space.svg` and the website's matching button and screenshot were all removed. Everything about the space theme in the two sections above is history. A `spaceTheme` value left in `storage.local` by an older version is ignored (it is no longer in `SETTINGS_KEYS`). The light/dark button stays and is never disabled now.
+
+## Compact settings page (1.7.0, same in both browsers)
+
+Same as the Firefox spec: a left rail with an icon next to each display switch and an icon Refresh button, hover notes in `data-tip`, a compact Labels card whose list scrolls inside it (`max-height: calc(100vh - 225px)`) so the page fits one screen. There is no Containers card in Chrome.
+

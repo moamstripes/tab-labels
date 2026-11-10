@@ -21,7 +21,7 @@ What it does
 - Right-click a tab, choose Label tab, pick a label. Choose Remove label to clear it.
 - Three labels to start with: Waiting, Paused and To do. Add your own, each with an emoji, a colour and an optional name.
 - Show labels the way you like with three separate switches: a coloured dot on the tab icon, the label name in the title, and the emoji in the title.
-- Containers: give a container a label, and every new tab opened in it gets that label automatically. An optional switch, Group tabs by container, also puts each container's tabs in a tab group named after its label. It works well alongside Container Bookmarks, a separate add-on that opens bookmarks in a container of your choice: a bookmark opens in its container and, once you have picked a label for that container, arrives already labelled. Tab Labels is not affiliated with Container Bookmarks.
+- Containers: give a container a label, and every new tab opened in it gets that label automatically. An optional Group switch on each container also puts that container's tabs in a tab group named after its label. It works well alongside Container Bookmarks, a separate add-on that opens bookmarks in a container of your choice: a bookmark opens in its container and, once you have picked a label for that container, arrives already labelled. Tab Labels is not affiliated with Container Bookmarks.
 - An emoji picker with search. Your computer's own emoji menu works in its search box too.
 - Export your labels to a file and import them on another computer.
 - A tab keeps its label while you browse, and after Firefox restarts if Firefox restores your tabs.
@@ -65,7 +65,7 @@ Why each permission is needed:
 - sessions: to remember each tab's label, including after a restart.
 - contextualIdentities: to list the user's containers so each can have a label.
 - cookies: only so Firefox reports which container a tab belongs to (tab.cookieStoreId). No cookie is read or written.
-- tabGroups: to name the tab group made for a container (only when the user switches on Group tabs by container).
+- tabGroups: to name the tab group made for a container (only when the user switches on Group for a container).
 - scripting: to add the content script to tabs that were already open when the extension was installed or updated (the Refresh labels on all tabs button).
 
 Network use: the background script fetches the favicon of a labelled page, from that page's own website without credentials, to draw the label dot on it. No other requests are made. data_collection_permissions is declared as none.

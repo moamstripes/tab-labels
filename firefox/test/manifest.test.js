@@ -65,12 +65,12 @@ test("settings page: import, export and reset are icon buttons with names, at th
   }
 });
 
-test("settings page (Firefox): the group-by-container switch is in the Containers card", () => {
+test("settings page (Firefox): grouping is a switch per container, not one for all", () => {
   const html = readFile("options/options.html");
-  const card = html.slice(html.indexOf("<h2>Containers</h2>"), html.indexOf('id="containers"'));
-  assertTrue(card.includes('id="group-toggle"') && card.includes('class="switch"'), "the switch must be in the Containers card, above the list");
-  assertTrue(card.includes("Group tabs by container"), "the switch needs its name");
-  assertTrue(!html.slice(html.indexOf("<aside"), html.indexOf("</aside>")).includes("group-toggle"), "it does not belong in the sidebar");
+  assertTrue(!html.includes('id="group-toggle"'), "there must be no single switch for every container");
+  const js = readFile("options/options.js");
+  assertTrue(js.includes("groupContainers") && js.includes("group-switch"), "options.js must draw a group switch in each container row");
+  assertTrue(js.includes("Group tabs from the") || js.includes("Group tabs from this"), "the per-container switch needs an accessible name");
 });
 
 test("settings page (Firefox): Containers come after Labels", () => {

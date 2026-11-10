@@ -58,7 +58,7 @@ The current version is in each `manifest.json`; published versions are on the re
 
 ## Gotchas
 
-- Settings page layout: Labels first, switches in a left sidebar, import/export/reset as icon buttons in the Labels card header (ids `import`, `export`, `reset` are used by the script and the tests). The sidebar is sticky only in tall windows; keep it that way, a sticky element taller than the window hides its lower part.
+- Settings page layout: a left rail attached to the window edge (`aside.rail`: three `.rail-toggle` rows, an icon next to a `.switch` with `data-key`, and the `#refresh-tabs` icon button), with the hover notes in `data-tip` (shown by CSS `::after`, also on keyboard focus). The main column holds Labels and, in Firefox, Containers side by side (`.panels`); `.list` scrolls inside its card (`max-height: calc(100vh - 225px)`) so the page fits one screen, and below 821px wide the rail becomes a bar and the cards stack. Import/export/reset are icon buttons in the Labels card header (ids `import`, `export`, `reset` are used by the script and the tests). Keep texts short; explanations go in the hover notes.
 - Top right of the settings page: `#mode-button` (sun/moon, setting `colorMode`, applied as `data-theme` on `<html>`). The website has the same button in CSS only (no scripts). The earlier "Take me to space" theme was removed on purpose; do not bring it back unasked.
 - `firefox/listing.md` is a ready-to-paste draft of the addons.mozilla.org listing (not part of the package). Keep it in step with the website text.
 
@@ -66,7 +66,7 @@ The current version is in each `manifest.json`; published versions are on the re
 - Never keep page state only in the content script's memory: after an update the old script is dead but its changes stay. The applied title prefix and the hidden icon links are recorded in the page (`data-tab-labels-*` attributes). Titles are always normalised with `TabLabels.normaliseTitle` (one prefix, at the front, whatever else is in the title).
 - Updates: Firefox kills the old content script, Chrome leaves it running in open tabs (cut off, but its observer still runs) and also clears `storage.session`. See the "Doubled labels" section of the spec. To test an update, install an older release from git (`git archive firefox-vX.Y.Z firefox`) and then the new code over it in a throwaway profile.
 
-- Group tabs by container (Firefox only): `groupByContainer`, planner `TabLabels.planContainerGroups` (pure, tested), runner `syncGroups` in `background.js`. It must never touch pinned tabs, tabs already in a group, or groups the user made (ownership is `storage.session` `ownedGroups` or a title equal to the label). See the last section of the spec.
+- Group tabs by container (Firefox only): `groupContainers` (a switch per container, `{ cookieStoreId: true }`, off by default; the old global `groupByContainer` from 1.6.0 is ignored), planner `TabLabels.planContainerGroups` (pure, tested), runner `syncGroups` in `background.js`. It must never touch pinned tabs, tabs already in a group, or groups the user made (ownership is `storage.session` `ownedGroups` or a title equal to the label). See the last section of the spec.
 - Firefox MV3 host permissions can be revoked by the user; labels then cannot show.
 - Labels cannot be shown on `about:`/`chrome://` pages, the PDF viewer or the add-on stores. The label is still stored.
 - A label's name is optional but its emoji is required (`validateLabel`). The title prefix is `emoji name · title`; with the name off it is `emoji · title`.

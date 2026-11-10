@@ -12,7 +12,7 @@
   --off: #aab0bd;
   --danger: #c0392b;
   --shadow: 0 1px 2px rgba(20, 24, 40, 0.06), 0 4px 14px rgba(20, 24, 40, 0.05);
-  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* Dark colours: used when the system is dark (unless light was chosen on this page),
@@ -62,87 +62,78 @@ body {
   color: var(--text);
 }
 
+/* The page: a narrow rail of switches attached to the left edge, and the main column beside it. */
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
 main {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 32px 16px 96px;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px 24px;
 }
 
 .page-header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .page-header img {
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
 }
 
 .page-header h1 {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.2rem;
   line-height: 1.2;
 }
 
 .page-header p {
-  margin: 2px 0 0;
+  margin: 0;
   color: var(--muted);
+  font-size: 0.85rem;
 }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: var(--shadow);
-  padding: 20px 22px;
-  margin-bottom: 18px;
+  padding: 10px 14px 12px;
+  margin: 0;
 }
 
 .card h2 {
   margin: 0 0 2px;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .hint {
-  margin: 0 0 14px;
+  margin: 0 0 6px;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .hint:empty {
   display: none;
 }
 
-/* Toggles */
-
-.toggle {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
-  cursor: pointer;
-}
-
-.toggle-text strong {
-  display: block;
-}
-
-.toggle-text small {
-  display: block;
-  color: var(--muted);
-  font-size: 0.88rem;
-}
+/* Switches */
 
 .switch {
   appearance: none;
   flex: none;
   position: relative;
-  width: 42px;
-  height: 24px;
-  margin: 1px 0 0;
-  border-radius: 12px;
+  width: 36px;
+  height: 20px;
+  margin: 0;
+  border-radius: 10px;
   background: var(--off);
   cursor: pointer;
   transition: background 0.15s;
@@ -153,8 +144,8 @@ main {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -165,8 +156,13 @@ main {
   background: var(--on);
 }
 
+.switch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .switch:checked::after {
-  transform: translateX(18px);
+  transform: translateX(16px);
 }
 
 .switch:focus-visible,
@@ -183,19 +179,23 @@ main {
   list-style: none;
   margin: 0;
   padding: 0;
+  /* A long list scrolls inside its card, so the page itself stays on one screen. */
+  max-height: calc(100vh - 225px);
+  min-height: 60px;
+  overflow-y: auto;
 }
 
 .list li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 0;
+  gap: 8px;
+  padding: 4px 0;
   border-top: 1px solid var(--border);
 }
 
 .list input[type="text"],
 .list select {
-  padding: 7px 10px;
+  padding: 4px 8px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--field);
@@ -204,9 +204,9 @@ main {
 }
 
 .emoji {
-  width: 3.6em;
+  width: 3.2em;
   text-align: center;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
 }
 
 .name {
@@ -216,8 +216,8 @@ main {
 
 .swatch {
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   border: 2px solid var(--border);
   border-radius: 50%;
@@ -233,9 +233,18 @@ main {
 
 .container-dot {
   flex: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
+}
+
+.group-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: pointer;
 }
 
 .container-name {
@@ -247,7 +256,7 @@ main {
 /* Buttons */
 
 .btn {
-  padding: 8px 14px;
+  padding: 4px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--field);
@@ -284,7 +293,7 @@ main {
   background: none;
   border-color: transparent;
   color: var(--danger);
-  padding: 6px 10px;
+  padding: 3px 8px;
 }
 
 .btn.danger:hover {
@@ -295,8 +304,8 @@ main {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 14px;
-  padding-top: 14px;
+  margin-top: 6px;
+  padding-top: 8px;
   border-top: 1px solid var(--border);
 }
 
@@ -325,10 +334,6 @@ main {
 }
 
 @media (max-width: 520px) {
-  .card {
-    padding: 16px;
-  }
-
   .list li {
     flex-wrap: wrap;
   }
@@ -427,50 +432,145 @@ main {
   font-size: 0.82rem;
 }
 
-/* Refresh all tabs */
+/* The rail: display switches (an icon next to a switch) and Refresh, attached to the left edge */
 
-.refresh-row {
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
+.rail {
+  position: sticky;
+  top: 0;
+  flex: none;
+  align-self: flex-start;
+  width: 84px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 10px;
+  background: var(--card);
+  border-right: 1px solid var(--border);
 }
 
-.refresh-row .hint {
-  margin-bottom: 10px;
+.rail-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: pointer;
 }
 
-/* Layout: switches in a sidebar, labels (and containers) in the main column */
+.rail-icon,
+.rail-refresh svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--muted);
+}
 
-.layout {
+.rail-refresh {
+  margin-top: auto;
+  align-self: flex-start;
+  width: 36px;
+  height: 36px;
+}
+
+/* Hover (or keyboard focus) explains what a switch or button does */
+
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: 260px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.35;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-within::after {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0.2s;
+}
+
+.rail-refresh[data-tip]::after {
+  top: auto;
+  bottom: 0;
+  transform: none;
+}
+
+/* Labels and Containers side by side, each a compact card */
+
+.panels {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 18px;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 12px;
   align-items: start;
 }
 
-/* The sidebar follows you down the page, but only in windows tall enough to show all of it:
-   a sticky element taller than the window would hide its lower part. */
-@media (min-height: 760px) and (min-width: 821px) {
-  .sidebar {
-    position: sticky;
-    top: 16px;
-  }
-}
-
-.sidebar .card {
-  margin-bottom: 0;
-}
-
-.content .card:last-child {
-  margin-bottom: 0;
-}
-
 @media (max-width: 820px) {
-  .layout {
-    grid-template-columns: 1fr;
+  .app {
+    flex-direction: column;
   }
 
-  .sidebar {
+  .rail {
     position: static;
+    align-self: stretch;
+    width: auto;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 6px 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rail-refresh {
+    margin: 0 0 0 auto;
+  }
+
+  [data-tip]::after {
+    left: 0;
+    top: calc(100% + 6px);
+    transform: none;
+  }
+
+  .rail-refresh[data-tip]::after {
+    left: auto;
+    right: 0;
+    bottom: auto;
+  }
+
+  .panels {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .list {
+    max-height: none;
   }
 }
 
@@ -497,8 +597,8 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border-color: transparent;
   background: none;
@@ -511,8 +611,8 @@ main {
 }
 
 .icon-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;

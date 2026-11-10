@@ -194,7 +194,7 @@ test("isColour accepts only #rrggbb", () => {
 test("SETTINGS_KEYS lists every stored setting", () => {
   assertEqual(
     TabLabels.SETTINGS_KEYS,
-    ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "groupByContainer", "displayMode", "colorMode"]
+    ["labels", "showFavicon", "showTitle", "showEmoji", "containerRules", "groupContainers", "displayMode", "colorMode"]
   );
 });
 
@@ -373,13 +373,26 @@ test("any other colour mode value falls back to the system setting", () => {
   }
 });
 
-test("grouping by container is off by default and only an exact true turns it on", () => {
-  assertEqual(TabLabels.defaultSettings().groupByContainer, false);
-  assertEqual(TabLabels.normaliseSettings({}).groupByContainer, false);
-  assertEqual(TabLabels.normaliseSettings({ groupByContainer: true }).groupByContainer, true);
-  for (const value of ["yes", 1, "true", null, {}, []]) {
-    assertEqual(TabLabels.normaliseSettings({ groupByContainer: value }).groupByContainer, false);
+test("grouping is off for every container by default, and only an exact true switches a container on", () => {
+  assertEqual(TabLabels.defaultSettings().groupContainers, {});
+  assertEqual(TabLabels.normaliseSettings({}).groupContainers, {});
+  assertEqual(TabLabels.normaliseSettings({ groupContainers: { "firefox-container-1": true } }).groupContainers, { "firefox-container-1": true });
+  for (const value of ["yes", 1, "true", null, false, {}, []]) {
+    assertEqual(TabLabels.normaliseSettings({ groupContainers: { "firefox-container-1": value } }).groupContainers, {});
   }
+});
+
+test("normaliseSettings keeps only real container ids in groupContainers and tolerates other shapes", () => {
+  const raw = { groupContainers: { "firefox-container-2": true, "firefox-default": true, nonsense: true } };
+  assertEqual(TabLabels.normaliseSettings(raw).groupContainers, { "firefox-container-2": true });
+  for (const value of [null, "x", 5, [], true]) {
+    assertEqual(TabLabels.normaliseSettings({ groupContainers: value }).groupContainers, {});
+  }
+});
+
+test("the old global groupByContainer setting no longer does anything", () => {
+  assertEqual(TabLabels.normaliseSettings({ groupByContainer: true }).groupContainers, {});
+  assertEqual("groupByContainer" in TabLabels.normaliseSettings({ groupByContainer: true }), false);
 });
 
 test("groupTitle is the label name, or the emoji when the name is empty", () => {
@@ -395,7 +408,7 @@ function groupSettings(extra) {
         { id: "quiet", name: "", emoji: "🔕", colour: "#4a7fd4" },
       ],
       containerRules: { "firefox-container-1": "waiting", "firefox-container-2": "quiet" },
-      groupByContainer: true,
+      groupContainers: { "firefox-container-1": true, "firefox-container-2": true },
     },
     extra
   );
@@ -405,12 +418,20 @@ function tabIn(id, container, extra) {
   return Object.assign({ id, windowId: 1, cookieStoreId: container, pinned: false, groupId: -1 }, extra);
 }
 
-test("planContainerGroups does nothing while the setting is off", () => {
-  const tabs = [tabIn(1, "firefox-container-1")];
-  assertEqual(TabLabels.planContainerGroups(tabs, {}, groupSettings({ groupByContainer: false })), []);
+test("planContainerGroups does nothing for containers that are not switched on", () => {
+  const tabs = [tabIn(1, "firefox-container-1"), tabIn(2, "firefox-container-2")];
+  assertEqual(TabLabels.planContainerGroups(tabs, {}, groupSettings({ groupContainers: {} })), []);
+  const plan = TabLabels.planContainerGroups(tabs, {}, groupSettings({ groupContainers: { "firefox-container-2": true } }));
+  assertEqual(plan.map((p) => p.cookieStoreId), ["firefox-container-2"]);
 });
 
-test("planContainerGroups makes one new group per container that has a label, named after it", () => {
+test("planContainerGroups does nothing for a switched-on container that has no label", () => {
+  const tabs = [tabIn(1, "firefox-container-3")];
+  const settings = groupSettings({ groupContainers: { "firefox-container-3": true } });
+  assertEqual(TabLabels.planContainerGroups(tabs, {}, settings), []);
+});
+
+test("planContainerGroups makes one new group per switched-on container that has a label, named after it", () => {
   const tabs = [
     tabIn(1, "firefox-container-1"),
     tabIn(2, "firefox-container-1"),
