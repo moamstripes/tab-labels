@@ -153,7 +153,7 @@ test("isColour accepts only #rrggbb", () => {
 test("SETTINGS_KEYS lists every stored setting", () => {
   assertEqual(
     TabLabels.SETTINGS_KEYS,
-    ["labels", "showFavicon", "showTitle", "showEmoji", "spaceTheme", "colorMode"]
+    ["labels", "showFavicon", "showTitle", "showEmoji", "colorMode"]
   );
 });
 
@@ -299,19 +299,6 @@ test("normaliseTitle replaces another label's prefix and can remove the label en
   const known = TabLabels.allPrefixes(TabLabels.defaultSettings().labels);
   assertEqual(TabLabels.normaliseTitle("⏸️ Paused · (2) Inbox", "⏳ Waiting · ", known), "⏳ Waiting · (2) Inbox");
   assertEqual(TabLabels.normaliseTitle("⏳ Waiting · (2) Inbox", "", known), "(2) Inbox");
-});
-
-test("the space theme is off by default and read as a plain on/off value", () => {
-  assertEqual(TabLabels.defaultSettings().spaceTheme, false);
-  assertEqual(TabLabels.normaliseSettings({}).spaceTheme, false);
-  assertEqual(TabLabels.normaliseSettings({ spaceTheme: true }).spaceTheme, true);
-  assertEqual(TabLabels.normaliseSettings({ spaceTheme: false }).spaceTheme, false);
-});
-
-test("anything that is not exactly true leaves the space theme off", () => {
-  for (const value of ["yes", 1, "true", null, {}, []]) {
-    assertEqual(TabLabels.normaliseSettings({ spaceTheme: value }).spaceTheme, false);
-  }
 });
 
 test("the colour mode follows the system until the user picks light or dark", () => {

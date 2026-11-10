@@ -71,28 +71,12 @@ test("settings page (Firefox): Containers come after Labels", () => {
 });
 
 
-test("the space theme's background picture exists and the stylesheet uses it", () => {
-  assertTrue(fileExists("options/space.svg"), "options/space.svg is missing");
-  const css = readFile("options/options.css");
-  assertTrue(css.includes('url("space.svg")') && css.includes(":root[data-space]"), "the stylesheet does not use space.svg");
-  const svg = readFile("options/space.svg");
-  assertTrue(svg.includes("<svg") && !svg.includes("<script"), "space.svg must be a plain picture with no script");
-});
-
-test("settings page: the sun/moon button and the space button are at the top right, the space button under the sun/moon", () => {
+test("settings page: the sun/moon button is at the top right of the header", () => {
   const html = readFile("options/options.html");
   const header = html.slice(html.indexOf('<header class="page-header">'), html.indexOf("</header>"));
   const controls = header.slice(header.indexOf('class="page-controls"'));
-  const mode = controls.indexOf('id="mode-button"');
-  const space = controls.indexOf('id="space-button"');
-  assertTrue(mode >= 0 && space > mode, "the sun/moon button must come first, then the space button");
-  const button = controls.slice(space, controls.indexOf("</button>", space));
-  assertTrue(button.includes("Take me to space") && button.includes("Land back"), "the space button needs both texts");
-  assertTrue(button.includes("(\ufe36\ufe39\ufe3a)"), "the 'Land back' face is missing");
-  assertTrue(!button.includes("<small"), "the space button has no description");
-  assertTrue(/<span aria-hidden="true">[^<]*\u2727<\/span>/.test(button) && /<span aria-hidden="true">\([^<]*\)<\/span>/.test(button), "the decorative symbols must be aria-hidden");
-  const aside = html.slice(html.indexOf("<aside"), html.indexOf("</aside>"));
-  assertTrue(!aside.includes("space") && !aside.includes("Space"), "nothing about space belongs in the sidebar any more");
+  assertTrue(controls.includes('id="mode-button"'), "the sun/moon button must be in the page controls");
+  assertTrue(!html.includes("space-button") && !html.includes("data-space"), "the space theme has been removed");
 });
 
 test("settings page: the sun/moon button has both icons and a name", () => {

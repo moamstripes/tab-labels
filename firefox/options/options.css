@@ -520,14 +520,10 @@ main {
   stroke-linejoin: round;
 }
 
-/* Top right of the page: the light/dark button, and the space button under it */
+/* Top right of the page: the light/dark button */
 
 .page-controls {
   margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
 }
 
 .mode-button .icon-sun {
@@ -540,66 +536,4 @@ main {
 
 .mode-button[data-mode="dark"] .icon-sun {
   display: inline;
-}
-
-.mode-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.space-button {
-  border-radius: 999px;
-  padding: 7px 16px;
-}
-
-.space-button .when-space {
-  display: none;
-}
-
-:root[data-space] .space-button .when-plain {
-  display: none;
-}
-
-:root[data-space] .space-button .when-space {
-  display: inline;
-}
-
-@media (max-width: 560px) {
-  .page-controls {
-    width: 100%;
-    margin-left: 0;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-
-/* "Take me to space" theme */
-
-:root[data-space] {
-  color-scheme: light;
-  --bg: #cdbdf0;
-  --card: rgba(255, 255, 255, 0.9);
-  --text: #2b2347;
-  --muted: #5d567f;
-  --border: rgba(110, 90, 170, 0.3);
-  --field: #ffffff;
-  --accent: #6f56cf;
-  --accent-text: #ffffff;
-  --on: #7b5fd6;
-  --off: #b3a8d6;
-  --danger: #b3392c;
-  --shadow: 0 2px 12px rgba(70, 50, 130, 0.2);
-}
-
-:root[data-space] body {
-  background: #cdbdf0 url("space.svg") center / cover no-repeat fixed;
-}
-
-:root[data-space] .card {
-  backdrop-filter: blur(3px);
-}
-
-:root[data-space] #emoji-picker {
-  background: #ffffff;
 }

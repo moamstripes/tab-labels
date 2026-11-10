@@ -403,27 +403,7 @@
         }
       }
 
-      .space-button {
-        padding: 7px 16px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        background: var(--card);
-        color: var(--text);
-        font-size: 0.92rem;
-        line-height: 1.4;
-        cursor: pointer;
-      }
-
-      .space-button:hover {
-        border-color: var(--accent);
-      }
-
-      .space-button .when-space {
-        display: none;
-      }
-
-      .mode-toggle:has(input:focus-visible),
-      .space-button:has(input:focus-visible) {
+      .mode-toggle:has(input:focus-visible) {
         outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
@@ -432,37 +412,6 @@
         .page-controls {
           display: none;
         }
-      }
-
-      /* "Take me to space": a pastel purple sky with little planets and stars */
-      :root:has(#space:checked) {
-        color-scheme: light;
-        --bg: #cdbdf0;
-        --card: rgba(255, 255, 255, 0.9);
-        --text: #2b2347;
-        --muted: #5d567f;
-        --border: rgba(110, 90, 170, 0.3);
-        --accent: #5b43b8;
-        --strip: #e6defa;
-        --tab: #ffffff;
-        --tab-idle: #f0eafc;
-      }
-
-      :root:has(#space:checked) .space-button .when-plain {
-        display: none;
-      }
-
-      :root:has(#space:checked) .space-button .when-space {
-        display: inline;
-      }
-
-      :root:has(#space:checked) .mode-toggle {
-        opacity: 0.4;
-        pointer-events: none;
-      }
-
-      :root:has(#space:checked) body {
-        background: #cdbdf0 url("assets/space.svg") center / cover no-repeat fixed;
       }
 
       @media (max-width: 560px) {
@@ -494,11 +443,6 @@
               <span class="vh">Switch between light and dark mode</span>
               <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.8 6.8 0 0 0 9.7 9.7z" /></svg>
               <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2.2m0 14.6v2.2M4.9 4.9l1.6 1.6m11 11 1.6 1.6M2.5 12h2.2m14.6 0h2.2M4.9 19.1l1.6-1.6m11-11 1.6-1.6" /></svg>
-            </label>
-            <label class="space-button">
-              <input type="checkbox" id="space" class="vh" />
-              <span class="when-plain">Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></span>
-              <span class="when-space">Land back <span aria-hidden="true">(︶︹︺)</span></span>
             </label>
           </div>
         </div>
@@ -545,7 +489,6 @@
             <li><strong>An emoji picker</strong> with search. Your computer's own emoji menu works in its search box too.</li>
             <li><strong>Move your labels around.</strong> Export your labels to a file and import them on another computer.</li>
             <li><strong>Labels stay put.</strong> A tab keeps its label while you browse, and after Firefox restarts if Firefox restores your tabs.</li>
-            <li><strong>A little extra.</strong> Press <em>Take me to space <span aria-hidden="true">⋆｡°✩₊˚.⋆☾⋆⁺✧</span></em> at the top right of the settings, or of this page, for a pastel purple sky with little planets and stars. <em>Land back <span aria-hidden="true">(︶︹︺)</span></em> takes you home. The sun and moon beside it switch between light and dark mode.</li>
             <li><strong>One button to tidy up.</strong> <em>Refresh labels on all tabs</em> takes the labels off every open tab and puts them back.</li>
           </ul>
         </section>
@@ -561,10 +504,6 @@
             <figure>
               <img class="shot picker" src="assets/emoji-picker.png" alt="The emoji picker: a search box and a grid of emoji in sections." width="340" height="375" />
               <figcaption>The emoji picker opens when you click a label's emoji box.</figcaption>
-            </figure>
-            <figure>
-              <img class="shot" src="assets/settings-space.png" alt="The settings page after switching on 'Take me to space': the same cards on a pastel purple sky with little planets and stars." width="1200" height="775" />
-              <figcaption>The same page after flipping <em>Take me to space</em>.</figcaption>
             </figure>
           </div>
         </section>
