@@ -6,7 +6,7 @@ There are two extensions here, one per browser. They share the same name, settin
 
 | Folder | Browser | Notes |
 | --- | --- | --- |
-| [`firefox/`](firefox/) | Firefox 140 or newer | Right-click a tab to label it. Container rules. Labels survive restarts. |
+| [`firefox/`](firefox/) | Firefox 142 or newer | Right-click a tab to label it. Container rules. Labels survive restarts. |
 | [`chrome/`](chrome/) | Chrome 110 or newer | Labels sit on the page and toolbar icon right-click menus. No containers. Labels are lost when Chrome quits. |
 
 Each folder has its own README with install steps, usage and a manual test checklist.

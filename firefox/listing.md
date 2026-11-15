@@ -30,7 +30,7 @@ What it does
 Privacy
 Tab Labels collects no data. It has no accounts, no analytics and no server. Your labels and settings are saved in your own browser. The extension only reads and changes two things on a page: its title and its icon. When the coloured dot is switched on, then for a tab that has a label it fetches that page's own icon from the same website, so it can draw the dot on it. Nothing else is requested, and nothing is sent about you.
 
-Needs Firefox 140 or newer on a computer.
+Needs Firefox 142 or newer on a computer.
 
 ## Categories
 Choose up to two, for example Tabs and Web Development.
