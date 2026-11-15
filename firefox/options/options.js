@@ -52,6 +52,29 @@ function applyMode(mode) {
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", updateModeButton);
 updateModeButton();
 
+// A quiet switch at the bottom right puts a background picture (options/space.png) behind the page.
+// Like the colour mode it is remembered in this browser only; it is not a stored setting.
+const SPACE_CACHE_KEY = "tab-labels-space";
+const spaceToggle = document.getElementById("space-toggle");
+
+function applySpace(on) {
+  document.documentElement.toggleAttribute("data-space", on);
+  spaceToggle.setAttribute("aria-pressed", String(on));
+  try {
+    localStorage.setItem(SPACE_CACHE_KEY, on ? "1" : "0");
+  } catch (e) {
+    // see above
+  }
+}
+
+try {
+  applySpace(localStorage.getItem(SPACE_CACHE_KEY) === "1");
+} catch (e) {
+  // no local storage in this context: the page simply starts plain
+}
+
+spaceToggle.addEventListener("click", () => applySpace(!document.documentElement.hasAttribute("data-space")));
+
 let rows = []; // { id: string | null, name, emoji, colour }
 let statusTimer = null;
 

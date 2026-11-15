@@ -152,3 +152,6 @@ The "Take me to space" button, its `spaceTheme` setting, the `data-space` styles
 
 Same as the Firefox spec: a left rail with an icon next to each display switch and an icon Refresh button, hover notes in `data-tip`, a compact Labels card whose list scrolls inside it (`max-height: calc(100vh - 225px)`) so the page fits one screen. There is no Containers card in Chrome.
 
+## Hidden space switch (15-11-2026)
+
+A plain-text switch, `⋅˚.⋆☾⁺₊ ‧`, sits fixed at the bottom right of the settings page. It is not drawn as a button and its text never changes. Pressing it puts `options/space.png` behind the page (`data-space` on `<html>`), pressing again takes it away. No picture is shipped: it is added by the owner, and without one the page just keeps its colour. The choice is kept in this browser only (`localStorage`), not in settings, so it is not exported or synced. The colours are not changed, only the page background gets the picture, with a light halo on the header text for legibility.

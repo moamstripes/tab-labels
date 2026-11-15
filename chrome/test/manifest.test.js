@@ -83,7 +83,7 @@ test("settings page: the sun/moon button is at the top right of the header", () 
   const header = html.slice(html.indexOf('<header class="page-header">'), html.indexOf("</header>"));
   const controls = header.slice(header.indexOf('class="page-controls"'));
   assertTrue(controls.includes('id="mode-button"'), "the sun/moon button must be in the page controls");
-  assertTrue(!html.includes("space-button") && !html.includes("data-space"), "the space theme has been removed");
+  assertTrue(!html.includes("space-button") && !html.includes("data-space"), "the old space button must stay gone");
 });
 
 test("settings page: the sun/moon button has both icons and a name", () => {
@@ -98,4 +98,18 @@ test("settings page: a light and a dark choice exist in the stylesheet, next to 
   const css = readFile("options/options.css");
   assertTrue(css.includes(':root[data-theme="dark"]') && css.includes(':root[data-theme="light"]'), "manual light and dark are missing");
   assertTrue(css.includes(':root:not([data-theme="light"])'), "the automatic dark colours must give way to an explicit light choice");
+});
+
+test("settings page: a quiet space switch sits at the bottom right and only toggles a background picture", () => {
+  const html = readFile("options/options.html");
+  const m = html.match(/<button id="space-toggle"[^>]*>(.*?)<\/button>/);
+  assertTrue(!!m, "the space switch is missing");
+  assertTrue(m[1].includes("\u22c5\u02da.\u22c6\u263e\u207a\u208a \u2027"), "the switch must show just those symbols");
+  assertTrue(m[0].includes('aria-pressed="false"') && /aria-label="[^"]+"/.test(m[0]), "the switch needs aria-pressed and an accessible name");
+  assertTrue(!/<button id="space-toggle"[^>]*class="[^"]*\bbtn\b/.test(m[0]), "it must not look like a button");
+  const css = readFile("options/options.css");
+  assertTrue(css.includes(':root[data-space] body') && css.includes('url("space.png")'), "the stylesheet must put space.png behind the page");
+  assertTrue(css.includes("position: fixed") && /\.space-toggle \{[^}]*right:[^}]*bottom:/.test(css), "the switch must be fixed at the bottom right");
+  const js = readFile("options/options.js");
+  assertTrue(js.includes("data-space") && !js.includes("storage.local.set({ spaceTheme"), "it is a per-browser look, not a stored setting");
 });

@@ -408,6 +408,44 @@
         outline-offset: 2px;
       }
 
+      /* A quiet switch at the bottom right, just a few symbols. It puts assets/space.png behind the page. */
+      .space-toggle {
+        position: fixed;
+        right: 14px;
+        bottom: 10px;
+        padding: 4px 6px;
+        border-radius: 4px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        letter-spacing: 0.08em;
+        opacity: 0.45;
+        cursor: pointer;
+        text-shadow: 0 0 6px var(--bg), 0 0 2px var(--bg);
+      }
+
+      .space-toggle:hover,
+      .space-toggle:has(input:focus-visible) {
+        opacity: 1;
+      }
+
+      .space-toggle:has(input:focus-visible) {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      :root:has(#space:checked) body {
+        background: var(--bg) url("assets/space.png") center / cover no-repeat fixed;
+      }
+
+      :root:has(#space:checked) header {
+        --muted: var(--text);
+        text-shadow: 0 0 8px var(--bg), 0 0 3px var(--bg);
+      }
+
+      :root:has(#space:checked) .space-toggle {
+        opacity: 0.8;
+      }
+
       @supports not selector(:has(*)) {
         .page-controls {
           display: none;
@@ -548,6 +586,11 @@
       <footer>
         <p>Made by <a href="https://github.com/moamstripes">moamstripes</a>. <a href="https://github.com/moamstripes/tab-labels">Source code on GitHub</a>.</p>
       </footer>
+      <label class="space-toggle">
+        <input type="checkbox" id="space" class="vh" />
+        <span class="vh">Space background</span>
+        <span aria-hidden="true">⋅˚.⋆☾⁺₊ ‧</span>
+      </label>
     </div>
   </body>
 </html>

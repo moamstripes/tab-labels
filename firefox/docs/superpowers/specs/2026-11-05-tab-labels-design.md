@@ -150,3 +150,6 @@ The "Take me to space" button, its `spaceTheme` setting, the `data-space` styles
 - **Panels.** Labels and Containers are two compact cards side by side (`.panels`, one card in Chrome). Spacing, fonts (14 px base), inputs and switches were reduced. `.list` has `max-height: calc(100vh - 225px)` and scrolls inside the card, so the page fits one screen however many labels or containers there are; in narrow windows it is not capped and the cards stack.
 - **Text.** The long hints were cut to one or two lines; the longer explanations live in the hover notes and the README.
 
+## Hidden space switch (15-11-2026)
+
+A plain-text switch, `⋅˚.⋆☾⁺₊ ‧`, sits fixed at the bottom right of the settings page. It is not drawn as a button and its text never changes. Pressing it puts `options/space.png` behind the page (`data-space` on `<html>`), pressing again takes it away. No picture is shipped: it is added by the owner, and without one the page just keeps its colour. The choice is kept in this browser only (`localStorage`), not in settings, so it is not exported or synced. The colours are not changed, only the page background gets the picture, with a light halo on the header text for legibility.
